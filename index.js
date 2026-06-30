@@ -5,7 +5,7 @@ import init, { processVlessHeader } from "./pkg/zr_wasm.js";
 import wasm from "./pkg/zr_wasm_bg.wasm";
 
 const decodeSecure = (encoded) => atob(encoded);
-const HTML_URL = "https://nirevil.github.io/zizifn/";
+const HTML_URL = "https://nscl5.github.io/zr";
 
 const Config = {
   userID: "be0ff9df-1468-41a0-8865-796d1c6800db",
@@ -116,7 +116,7 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
   const mainDomains = [
     hostName, "creativecommons.org", "www.speedtest.net", "sky.rethinkdns.com",
     "chat.openai.com", "go.inmobi.com", "singapore.com",
-    "www.visa.com", "www.wto.org", "chatgpt.com", "codepen.io", "medium.com", "npmjs.com",
+    "www.wto.org", "chatgpt.com", "codepen.io", "medium.com", "npmjs.com",
     "nodejs.org", "jsdelivr.com", "csgo.com", "harbor.io", "linkerd.io", "fbi.gov", "zula.ir"
   ];
 
