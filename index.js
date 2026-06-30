@@ -3,11 +3,16 @@ import init, { processVlessHeader } from "./pkg/zr_wasm.js";
 import wasm from "./pkg/zr_wasm_bg.wasm";
 
 const decodeSecure = (encoded) => atob(encoded);
-const HTML_URL = "https://nscl5.github.io/zr/";
+const HTML_URL = "https://nscl5.github.io/zr";
 
 const Config = {
   userID: "be0ff9df-1468-41a0-8865-796d1c6800db",
   proxyIPs: ["nima.nscl.ir:443"],
+  scamalytics: {
+    username: "revilseptember",
+    apiKey: "b2fc368184deb3d8ac914bd776b8215fe899dd8fef69fbaba77511acfbdeca0d",
+    baseUrl: "https://api12.scamalytics.com/v3/",
+  },
 
   fromEnv(env) {
     const selectedProxyIP =
@@ -19,6 +24,11 @@ const Config = {
       proxyIP: proxyHost,
       proxyPort: proxyPort,
       proxyAddress: selectedProxyIP,
+      scamalytics: {
+        username: env.SCAMALYTICS_USERNAME || this.scamalytics.username,
+        apiKey: env.SCAMALYTICS_API_KEY || this.scamalytics.apiKey,
+        baseUrl: env.SCAMALYTICS_BASEURL || this.scamalytics.baseUrl,
+      },
     };
   },
 };
@@ -103,7 +113,7 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
 
   const mainDomains = [
     hostName, "creativecommons.org", "www.speedtest.net", "sky.rethinkdns.com",
-    "chat.openai.com", "go.inmobi.com", "singapore.com",
+    "chat.openai.com", "cfip.xxxxxxxx.tk", "go.inmobi.com", "singapore.com",
     "www.visa.com", "www.wto.org", "chatgpt.com", "medium.com", "npmjs.com",
     "nodejs.org", "csgo.com", "harbor.io", "linkerd.io", "fbi.gov", "zula.ir"
   ];
@@ -112,34 +122,6 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
   const httpPorts = [80, 8080, 8880, 2052, 2082, 2086, 2095];
   let links = [];
   const isPagesDeployment = hostName.endsWith(".pages.dev");
-
-  const customIpsParam = url.searchParams.get("clean_ips");
-  if (customIpsParam) {
-    const customIps = customIpsParam.split(",").map(x => x.trim()).filter(Boolean);
-    customIps.forEach((ip, i) => {
-      let host = ip;
-      let portTls = pick(httpsPorts);
-      let portTcp = pick(httpPorts);
-      
-      if (ip.includes(":") && !ip.startsWith("[")) {
-        const parts = ip.split(":");
-        host = parts[0];
-        portTls = parseInt(parts[1], 10) || portTls;
-        portTcp = parseInt(parts[1], 10) || portTcp;
-      } else if (ip.startsWith("[") && ip.includes("]:")) {
-        const parts = ip.split("]:");
-        host = parts[0] + "]";
-        portTls = parseInt(parts[1], 10) || portTls;
-        portTcp = parseInt(parts[1], 10) || portTcp;
-      }
-      
-      const formattedAddress = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
-      links.push(buildLink({ core, proto: "tls", userID, hostName, address: formattedAddress, port: portTls, tag: `CustomIP${i + 1}` }));
-      if (!isPagesDeployment) {
-        links.push(buildLink({ core, proto: "tcp", userID, hostName, address: formattedAddress, port: portTcp, tag: `CustomIP${i + 1}` }));
-      }
-    });
-  }
 
   mainDomains.forEach((domain, i) => {
     links.push(buildLink({ core, proto: "tls", userID, hostName, address: domain, port: pick(httpsPorts), tag: `Domain${i + 1}` }));
@@ -359,43 +341,77 @@ function safeCloseWebSocket(socket) {
   }
 }
 
+async function createDnsPipeline(webSocket, vlessResponseHeader, log) {
+  let isHeaderSent = false;
+  const transformStream = new TransformStream({
+    transform(chunk, controller) {
+      for (let index = 0; index < chunk.byteLength; ) {
+        const lengthBuffer = chunk.slice(index, index + 2);
+        const udpPacketLength = new DataView(lengthBuffer).getUint16(0);
+        const udpData = new Uint8Array(chunk.slice(index + 2, index + 2 + udpPacketLength));
+        index = index + 2 + udpPacketLength;
+        controller.enqueue(udpData);
+      }
+    },
+  });
+
+  transformStream.readable
+    .pipeTo(
+      new WritableStream({
+        async write(chunk) {
+          try {
+            const resp = await safeFetch(`https://1.1.1.1/dns-query`, {
+              method: "POST",
+              headers: { "content-type": "application/dns-message" },
+              body: chunk,
+            }, 3000);
+            const dnsQueryResult = await resp.arrayBuffer();
+            const udpSize = dnsQueryResult.byteLength;
+            const udpSizeBuffer = new Uint8Array([(udpSize >> 8) & 0xff, udpSize & 0xff]);
+
+            if (webSocket.readyState === CONST.WS_READY_STATE_OPEN) {
+              if (isHeaderSent) {
+                webSocket.send(await new Blob([udpSizeBuffer, dnsQueryResult]).arrayBuffer());
+              } else {
+                webSocket.send(await new Blob([vlessResponseHeader, udpSizeBuffer, dnsQueryResult]).arrayBuffer());
+                isHeaderSent = true;
+              }
+            }
+          } catch (error) { log("DNS query error: " + error); }
+        },
+      }),
+    )
+    .catch((e) => log("DNS stream error: " + e));
+
+  const writer = transformStream.writable.getWriter();
+  return { write: (chunk) => writer.write(chunk) };
+}
+
+async function handleScamalyticsLookup(request, config) {
+  const url = new URL(request.url);
+  const ipToLookup = url.searchParams.get("ip");
+  if (!ipToLookup) return new Response(JSON.stringify({ error: "Missing IP" }), { status: 400, headers: { "Content-Type": "application/json" } });
+
+  const { username, apiKey, baseUrl } = config.scamalytics;
+  if (!username || !apiKey) return new Response(JSON.stringify({ error: "Scamalytics API not configured" }), { status: 500, headers: { "Content-Type": "application/json" } });
+
+  const scamalyticsUrl = `${baseUrl}${username}/?key=${apiKey}&ip=${ipToLookup}`;
+  const headers = new Headers({ "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+
+  try {
+    const scamalyticsResponse = await fetch(scamalyticsUrl);
+    return new Response(JSON.stringify(await scamalyticsResponse.json()), { headers });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.toString() }), { status: 500, headers });
+  }
+}
+
 async function handleConfigPage(userID, hostName, proxyAddress) {
   const dream = buildLink({ core: "xray", proto: "tls", userID, hostName, address: hostName, port: 443, tag: `${hostName}-Xray` });
   const freedom = buildLink({ core: "sb", proto: "tls", userID, hostName, address: hostName, port: 443, tag: `${hostName}-Singbox` });
   const encodedSubName = encodeURIComponent("INDEX");
   const subXrayUrl = `https://${hostName}/xray/${userID}?name=${encodedSubName}`;
   const subSbUrl = `https://${hostName}/sb/${userID}?name=${encodedSubName}`;
-
-  const proxyDomain = proxyAddress.split(":")[0];
-  let proxyIp = proxyDomain;
-  let proxyLocation = "Germany";
-  let proxyIsp = "Global Connectivity Solutions LLP";
-
-  if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(proxyDomain)) {
-    try {
-      const dnsRes = await safeFetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(proxyDomain)}&type=A`, {
-        headers: { "accept": "application/dns-json" }
-      }, 3000);
-      if (dnsRes.ok) {
-        const dnsData = await dnsRes.json();
-        const ipAnswer = dnsData.Answer?.find((a) => a.type === 1);
-        if (ipAnswer) proxyIp = ipAnswer.data;
-      }
-    } catch (e) { console.error("Server DNS resolution failed", e); }
-  }
-
-  try {
-    const geoRes = await safeFetch(`https://freeipapi.com/api/json/${proxyIp}`, {}, 3000);
-    if (geoRes.ok) {
-      const geoData = await geoRes.json();
-      const countryCode = geoData.countryCode ? geoData.countryCode.toLowerCase() : "de";
-      const flagHtml = `<img src="https://flagcdn.com/w20/${countryCode}.png" alt="${countryCode}" class="country-flag"> `;
-      const locationText = [geoData.cityName, geoData.countryName].filter(Boolean).join(", ") || "Germany";
-      
-      proxyLocation = flagHtml + locationText;
-      proxyIsp = geoData.asName || "Global Connectivity Solutions LLP";
-    }
-  } catch (e) { console.error("Server IP Geolocation failed", e); }
 
   try {
     const response = await safeFetch(HTML_URL);
@@ -404,9 +420,6 @@ async function handleConfigPage(userID, hostName, proxyAddress) {
     let finalHTML = await response.text();
     finalHTML = finalHTML
       .replace(/{{PROXY_ADDRESS}}/g, proxyAddress)
-      .replace(/{{PROXY_IP}}/g, proxyIp)
-      .replace(/{{PROXY_LOCATION}}/g, proxyLocation)
-      .replace(/{{PROXY_ISP}}/g, proxyIsp)
       .replace(/{{CONFIG_DREAM}}/g, dream)
       .replace(/{{CONFIG_FREEDOM}}/g, freedom)
       .replace(/{{URL_HIDDIFY}}/g, `hiddify://install-config?url=${encodeURIComponent(subXrayUrl)}`)
@@ -438,23 +451,7 @@ export default {
         return ProtocolOverWSHandler(request, requestConfig);
       }
 
-      if (url.pathname === "/ip-lookup") {
-        const ip = url.searchParams.get("ip");
-        if (!ip) return new Response("Missing IP", { status: 400 });
-        try {
-          const res = await safeFetch(`https://freeipapi.com/api/json/${ip}`, {}, 4000);
-          const data = await res.json();
-          return new Response(JSON.stringify(data), {
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
-        } catch (e) {
-          return new Response(JSON.stringify({ error: e.message }), {
-            status: 500,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
-        }
-      }
-
+      if (url.pathname === "/scamalytics-lookup") return handleScamalyticsLookup(request, cfg);
       if (url.pathname.startsWith(`/xray/${cfg.userID}`)) return handleIpSubscription(request, "xray", cfg.userID, url.hostname, ctx);
       if (url.pathname.startsWith(`/sb/${cfg.userID}`)) return handleIpSubscription(request, "sb", cfg.userID, url.hostname, ctx);
       if (url.pathname.startsWith(`/${cfg.userID}`)) return handleConfigPage(cfg.userID, url.hostname, cfg.proxyAddress);
