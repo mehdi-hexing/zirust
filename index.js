@@ -401,18 +401,48 @@ async function handleScamalyticsLookup(request, config) {
   const ipToLookup = url.searchParams.get("ip");
   if (!ipToLookup) return new Response(JSON.stringify({ error: "Missing IP" }), { status: 400, headers: { "Content-Type": "application/json" } });
 
-  const { username, apiKey, baseUrl } = config.scamalytics;
-  if (!username || !apiKey) return new Response(JSON.stringify({ error: "Scamalytics API not configured" }), { status: 500, headers: { "Content-Type": "application/json" } });
-
-  const scamalyticsUrl = `${baseUrl}${username}/?key=${apiKey}&ip=${ipToLookup}`;
+  const cf = request.cf || {};
   const headers = new Headers({ "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
 
-  try {
-    const scamalyticsResponse = await fetch(scamalyticsUrl);
-    return new Response(JSON.stringify(await scamalyticsResponse.json()), { headers });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.toString() }), { status: 500, headers });
-  }
+  const isp = cf.asOrganization || "Unknown ISP";
+  const city = cf.city || "Unknown City";
+  const countryCode = cf.country || "US";
+
+  const dcKeywords = [
+    "hosting", "datacenter", "server", "cloud", "hetzner", "digitalocean", 
+    "ovh", "linode", "amazon", "aws", "google", "microsoft", "azure", 
+    "leaseweb", "vultr", "contabo", "datacamp", "choopa", "m276", "fastly",
+    "cloudflare", "zenlayer", "colocation", "quadranet", "i3d", "scaleway",
+    "plusserver", "interserver", "liquidweb", "arvancloud", "derak"
+  ];
+
+  const ispLower = isp.toLowerCase();
+  const isDatacenter = dcKeywords.some(keyword => ispLower.includes(keyword));
+
+  const score = isDatacenter ? 100 : 0;
+  const risk = isDatacenter ? "very high" : "low";
+
+  const emulatedResponse = {
+    scamalytics: {
+      status: "ok",
+      ip: ipToLookup,
+      scamalytics_isp: isp,
+      scamalytics_score: score,
+      scamalytics_risk: risk
+    },
+    external_datasources: {
+      ipinfo: {
+        as_name: isp,
+        ip_country_name: countryCode,
+        ip_country_code: countryCode
+      },
+      maxmind_geolite2: {
+        ip_city: city
+      }
+    }
+  };
+
+  return new Response(JSON.stringify(emulatedResponse), { headers });
 }
 
 async function handleConfigPage(userID, hostName, proxyAddress) {
