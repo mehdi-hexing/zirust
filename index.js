@@ -1,16 +1,17 @@
+// @ts-nocheck
 import { connect } from "cloudflare:sockets";
 import init, { processVlessHeader } from "./pkg/zr_wasm.js";
 import wasm from "./pkg/zr_wasm_bg.wasm";
 
 const decodeSecure = (encoded) => atob(encoded);
-const HTML_URL = "https://nscl5.github.io/zr";
+const HTML_URL = "https://nscl5.github.io/zr/";
 
 const Config = {
   userID: "be0ff9df-1468-41a0-8865-796d1c6800db",
   proxyIPs: ["nima.nscl.ir:443"],
   scamalytics: {
-    username: "revilseptember",
-    apiKey: "b2fc368184deb3d8ac914bd776b8215fe899dd8fef69fbaba77511acfbdeca0d",
+    username: "victoriacrossn",
+    apiKey: "ed89b4fef21aba43c15cdd15cff2138dd8d3bbde5aaaa4690ad8e94990448516",
     baseUrl: "https://api12.scamalytics.com/v3/",
   },
 
@@ -62,12 +63,34 @@ function generateRandomPath(length = 28, query = "") {
 
 const CORE_PRESETS = {
   xray: {
-    tls: { path: () => generateRandomPath(12, "ed=2048"), security: "tls", fp: "chrome", alpn: "http/1.1", extra: {} },
-    tcp: { path: () => generateRandomPath(12, "ed=2560"), security: "none", fp: "chrome", extra: {} },
+    tls: {
+      path: () => generateRandomPath(12, "ed=2048"),
+      security: "tls",
+      fp: "chrome",
+      alpn: "http/1.1",
+      extra: {},
+    },
+    tcp: {
+      path: () => generateRandomPath(12, "ed=2560"),
+      security: "none",
+      fp: "chrome",
+      extra: {},
+    },
   },
   sb: {
-    tls: { path: () => generateRandomPath(18), security: "tls", fp: "chrome", alpn: "http/1.1", extra: CONST.ED_PARAMS },
-    tcp: { path: () => generateRandomPath(18), security: "none", fp: "chrome", extra: CONST.ED_PARAMS },
+    tls: {
+      path: () => generateRandomPath(18),
+      security: "tls",
+      fp: "chrome",
+      alpn: "http/1.1",
+      extra: CONST.ED_PARAMS,
+    },
+    tcp: {
+      path: () => generateRandomPath(18),
+      security: "none",
+      fp: "chrome",
+      extra: CONST.ED_PARAMS,
+    },
   },
 };
 
@@ -75,7 +98,19 @@ function makeName(tag, proto) {
   return `${tag}-${proto.toUpperCase()}`;
 }
 
-function createVlessLink({ userID, address, port, host, path, security, sni, fp, alpn, extra = {}, name }) {
+function createVlessLink({
+  userID,
+  address,
+  port,
+  host,
+  path,
+  security,
+  sni,
+  fp,
+  alpn,
+  extra = {},
+  name,
+}) {
   const params = new URLSearchParams({ type: decodeSecure("d3M="), host, path });
   if (security) {
     params.set("security", security);
@@ -109,13 +144,33 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 async function handleIpSubscription(request, core, userID, hostName, ctx) {
   const url = new URL(request.url);
   const subName = url.searchParams.get("name");
-  const CAKE_INFO = { total_TB: 380, base_GB: 42000, daily_growth_GB: 250, expire_date: "2028-4-20" };
+  const CAKE_INFO = {
+    total_TB: 380,
+    base_GB: 42000,
+    daily_growth_GB: 250,
+    expire_date: "2028-4-20",
+  };
 
   const mainDomains = [
-    hostName, "creativecommons.org", "www.speedtest.net", "sky.rethinkdns.com",
-    "chat.openai.com", "cfip.xxxxxxxx.tk", "go.inmobi.com", "singapore.com",
-    "www.visa.com", "www.wto.org", "chatgpt.com", "medium.com", "npmjs.com",
-    "nodejs.org", "csgo.com", "harbor.io", "linkerd.io", "fbi.gov", "zula.ir"
+    hostName,
+    "creativecommons.org",
+    "www.speedtest.net",
+    "sky.rethinkdns.com",
+    "chat.openai.com",
+    "cfip.xxxxxxxx.tk",
+    "go.inmobi.com",
+    "singapore.com",
+    "www.visa.com",
+    "www.wto.org",
+    "chatgpt.com",
+    "medium.com",
+    "npmjs.com",
+    "nodejs.org",
+    "csgo.com",
+    "harbor.io",
+    "linkerd.io",
+    "fbi.gov",
+    "zula.ir",
   ];
 
   const httpsPorts = [443, 8443, 2053, 2083, 2087, 2096];
@@ -124,9 +179,29 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
   const isPagesDeployment = hostName.endsWith(".pages.dev");
 
   mainDomains.forEach((domain, i) => {
-    links.push(buildLink({ core, proto: "tls", userID, hostName, address: domain, port: pick(httpsPorts), tag: `Domain${i + 1}` }));
+    links.push(
+      buildLink({
+        core,
+        proto: "tls",
+        userID,
+        hostName,
+        address: domain,
+        port: pick(httpsPorts),
+        tag: `Domain${i + 1}`,
+      }),
+    );
     if (!isPagesDeployment) {
-      links.push(buildLink({ core, proto: "tcp", userID, hostName, address: domain, port: pick(httpPorts), tag: `Domain${i + 1}` }));
+      links.push(
+        buildLink({
+          core,
+          proto: "tcp",
+          userID,
+          hostName,
+          address: domain,
+          port: pick(httpPorts),
+          tag: `Domain${i + 1}`,
+        }),
+      );
     }
   });
 
@@ -136,9 +211,15 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
     let response = await cache.match(cacheKey);
 
     if (!response) {
-      const r = await safeFetch("https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/Cloudflare-IPs.json", {}, 4000);
+      const r = await safeFetch(
+        "https://raw.githubusercontent.com/NiREvil/vless/refs/heads/main/Cloudflare-IPs.json",
+        {},
+        4000,
+      );
       if (r.ok) {
-        response = new Response(await r.text(), { headers: { "Cache-Control": "public, max-age=86400" } });
+        response = new Response(await r.text(), {
+          headers: { "Cache-Control": "public, max-age=86400" },
+        });
         ctx.waitUntil(cache.put(cacheKey, response.clone()));
       }
     }
@@ -148,9 +229,29 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
       const ips = [...(json.ipv4 || []), ...(json.ipv6 || [])].slice(0, 20).map((x) => x.ip);
       ips.forEach((ip, i) => {
         const formattedAddress = ip.includes(":") ? `[${ip}]` : ip;
-        links.push(buildLink({ core, proto: "tls", userID, hostName, address: formattedAddress, port: pick(httpsPorts), tag: `IP${i + 1}` }));
+        links.push(
+          buildLink({
+            core,
+            proto: "tls",
+            userID,
+            hostName,
+            address: formattedAddress,
+            port: pick(httpsPorts),
+            tag: `IP${i + 1}`,
+          }),
+        );
         if (!isPagesDeployment) {
-          links.push(buildLink({ core, proto: "tcp", userID, hostName, address: formattedAddress, port: pick(httpPorts), tag: `IP${i + 1}` }));
+          links.push(
+            buildLink({
+              core,
+              proto: "tcp",
+              userID,
+              hostName,
+              address: formattedAddress,
+              port: pick(httpPorts),
+              tag: `IP${i + 1}`,
+            }),
+          );
         }
       });
     }
@@ -170,7 +271,11 @@ async function handleIpSubscription(request, core, userID, hostName, ctx) {
   const expire_timestamp = Math.floor(new Date(CAKE_INFO.expire_date).getTime() / 1000);
   const subInfo = `upload=${Math.round(cake_upload)}; download=${Math.round(cake_download)}; total=${total_bytes}; expire=${expire_timestamp}`;
 
-  const headers = { "Content-Type": "text/plain;charset=utf-8", "Profile-Update-Interval": "6", "Subscription-Userinfo": subInfo };
+  const headers = {
+    "Content-Type": "text/plain;charset=utf-8",
+    "Profile-Update-Interval": "6",
+    "Subscription-Userinfo": subInfo,
+  };
   if (subName) headers["Profile-Title"] = subName;
   return new Response(btoa(links.join("\n")), { headers });
 }
@@ -235,16 +340,31 @@ async function ProtocolOverWSHandler(request, config) {
             config,
           );
         },
-        close() { log(`readableWebSocketStream closed`); },
-        abort(err) { log(`readableWebSocketStream aborted`, err); },
+        close() {
+          log(`readableWebSocketStream closed`);
+        },
+        abort(err) {
+          log(`readableWebSocketStream aborted`, err);
+        },
       }),
     )
-    .catch((err) => { console.error("Pipeline failed:", err.stack || err); });
+    .catch((err) => {
+      console.error("Pipeline failed:", err.stack || err);
+    });
 
   return new Response(null, { status: 101, webSocket: client });
 }
 
-async function HandleTCPOutBound(remoteSocket, addressRemote, portRemote, rawClientData, webSocket, protocolResponseHeader, log, config) {
+async function HandleTCPOutBound(
+  remoteSocket,
+  addressRemote,
+  portRemote,
+  rawClientData,
+  webSocket,
+  protocolResponseHeader,
+  log,
+  config,
+) {
   async function connectAndWrite(address, port) {
     const tcpSocket = connect({ hostname: address, port: port });
     remoteSocket.value = tcpSocket;
@@ -256,7 +376,10 @@ async function HandleTCPOutBound(remoteSocket, addressRemote, portRemote, rawCli
   }
 
   async function retry() {
-    const tcpSocket = await connectAndWrite(config.proxyIP || addressRemote, config.proxyPort || portRemote);
+    const tcpSocket = await connectAndWrite(
+      config.proxyIP || addressRemote,
+      config.proxyPort || portRemote,
+    );
     tcpSocket.closed
       .catch((error) => console.log("retry tcpSocket closed error", error))
       .finally(() => safeCloseWebSocket(webSocket));
@@ -297,7 +420,8 @@ async function RemoteSocketToWS(remoteSocket, webSocket, protocolResponseHeader,
     await remoteSocket.readable.pipeTo(
       new WritableStream({
         async write(chunk) {
-          if (webSocket.readyState !== CONST.WS_READY_STATE_OPEN) throw new Error("WebSocket is not open");
+          if (webSocket.readyState !== CONST.WS_READY_STATE_OPEN)
+            throw new Error("WebSocket is not open");
           hasIncomingData = true;
           const dataToSend = protocolResponseHeader
             ? await new Blob([protocolResponseHeader, chunk]).arrayBuffer()
@@ -305,8 +429,12 @@ async function RemoteSocketToWS(remoteSocket, webSocket, protocolResponseHeader,
           webSocket.send(dataToSend);
           protocolResponseHeader = null;
         },
-        close() { log(`Remote connection readable closed.`); },
-        abort(reason) { console.error(`Remote connection readable aborted:`, reason); },
+        close() {
+          log(`Remote connection readable closed.`);
+        },
+        abort(reason) {
+          console.error(`Remote connection readable aborted:`, reason);
+        },
       }),
     );
   } catch (error) {
@@ -334,7 +462,10 @@ function base64ToArrayBuffer(base64Str) {
 
 function safeCloseWebSocket(socket) {
   try {
-    if (socket.readyState === CONST.WS_READY_STATE_OPEN || socket.readyState === CONST.WS_READY_STATE_CLOSING)
+    if (
+      socket.readyState === CONST.WS_READY_STATE_OPEN ||
+      socket.readyState === CONST.WS_READY_STATE_CLOSING
+    )
       socket.close();
   } catch (error) {
     console.error("safeCloseWebSocket error:", error);
@@ -360,11 +491,15 @@ async function createDnsPipeline(webSocket, vlessResponseHeader, log) {
       new WritableStream({
         async write(chunk) {
           try {
-            const resp = await safeFetch(`https://1.1.1.1/dns-query`, {
-              method: "POST",
-              headers: { "content-type": "application/dns-message" },
-              body: chunk,
-            }, 3000);
+            const resp = await safeFetch(
+              `https://1.1.1.1/dns-query`,
+              {
+                method: "POST",
+                headers: { "content-type": "application/dns-message" },
+                body: chunk,
+              },
+              3000,
+            );
             const dnsQueryResult = await resp.arrayBuffer();
             const udpSize = dnsQueryResult.byteLength;
             const udpSizeBuffer = new Uint8Array([(udpSize >> 8) & 0xff, udpSize & 0xff]);
@@ -373,11 +508,19 @@ async function createDnsPipeline(webSocket, vlessResponseHeader, log) {
               if (isHeaderSent) {
                 webSocket.send(await new Blob([udpSizeBuffer, dnsQueryResult]).arrayBuffer());
               } else {
-                webSocket.send(await new Blob([vlessResponseHeader, udpSizeBuffer, dnsQueryResult]).arrayBuffer());
+                webSocket.send(
+                  await new Blob([
+                    vlessResponseHeader,
+                    udpSizeBuffer,
+                    dnsQueryResult,
+                  ]).arrayBuffer(),
+                );
                 isHeaderSent = true;
               }
             }
-          } catch (error) { log("DNS query error: " + error); }
+          } catch (error) {
+            log("DNS query error: " + error);
+          }
         },
       }),
     )
@@ -390,25 +533,95 @@ async function createDnsPipeline(webSocket, vlessResponseHeader, log) {
 async function handleScamalyticsLookup(request, config) {
   const url = new URL(request.url);
   const ipToLookup = url.searchParams.get("ip");
-  if (!ipToLookup) return new Response(JSON.stringify({ error: "Missing IP" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  if (!ipToLookup)
+    return new Response(JSON.stringify({ error: "Missing IP" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  const cache = caches.default;
+  const cacheKey = new Request(`https://scam-cache.local/${ipToLookup}`);
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
 
   const { username, apiKey, baseUrl } = config.scamalytics;
-  if (!username || !apiKey) return new Response(JSON.stringify({ error: "Scamalytics API not configured" }), { status: 500, headers: { "Content-Type": "application/json" } });
+  if (!username || !apiKey)
+    return new Response(JSON.stringify({ error: "Scamalytics API not configured" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
 
   const scamalyticsUrl = `${baseUrl}${username}/?key=${apiKey}&ip=${ipToLookup}`;
-  const headers = new Headers({ "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Cache-Control": "public, max-age=43200",
+  });
 
   try {
     const scamalyticsResponse = await fetch(scamalyticsUrl);
-    return new Response(JSON.stringify(await scamalyticsResponse.json()), { headers });
+    const body = await scamalyticsResponse.text();
+    const response = new Response(body, { headers });
+    await cache.put(cacheKey, response.clone());
+    return response;
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.toString() }), { status: 500, headers });
+    return new Response(JSON.stringify({ error: error.toString() }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+async function handleResolveDomain(request) {
+  const url = new URL(request.url);
+  const domain = url.searchParams.get("domain");
+  if (!domain)
+    return new Response(JSON.stringify({ error: "Missing domain" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(domain)) {
+    return new Response(JSON.stringify({ ip: domain }), { headers });
+  }
+
+  try {
+    const dnsRes = await safeFetch(
+      `https://1.1.1.1/dns-query?name=${encodeURIComponent(domain)}&type=A`,
+      {
+        headers: { accept: "application/dns-json" },
+      },
+      4000,
+    );
+    const dnsData = await dnsRes.json();
+    const ipAnswer = dnsData.Answer?.find((a) => a.type === 1);
+    return new Response(JSON.stringify({ ip: ipAnswer ? ipAnswer.data : null }), { headers });
+  } catch (error) {
+    return new Response(JSON.stringify({ ip: null, error: error.toString() }), { headers });
   }
 }
 
 async function handleConfigPage(userID, hostName, proxyAddress) {
-  const dream = buildLink({ core: "xray", proto: "tls", userID, hostName, address: hostName, port: 443, tag: `${hostName}-Xray` });
-  const freedom = buildLink({ core: "sb", proto: "tls", userID, hostName, address: hostName, port: 443, tag: `${hostName}-Singbox` });
+  const dream = buildLink({
+    core: "xray",
+    proto: "tls",
+    userID,
+    hostName,
+    address: hostName,
+    port: 443,
+    tag: `${hostName}-Xray`,
+  });
+  const freedom = buildLink({
+    core: "sb",
+    proto: "tls",
+    userID,
+    hostName,
+    address: hostName,
+    port: 443,
+    tag: `${hostName}-Singbox`,
+  });
   const encodedSubName = encodeURIComponent("INDEX");
   const subXrayUrl = `https://${hostName}/xray/${userID}?name=${encodedSubName}`;
   const subSbUrl = `https://${hostName}/sb/${userID}?name=${encodedSubName}`;
@@ -423,13 +636,25 @@ async function handleConfigPage(userID, hostName, proxyAddress) {
       .replace(/{{CONFIG_DREAM}}/g, dream)
       .replace(/{{CONFIG_FREEDOM}}/g, freedom)
       .replace(/{{URL_HIDDIFY}}/g, `hiddify://install-config?url=${encodeURIComponent(subXrayUrl)}`)
-      .replace(/{{URL_V2RAYNG}}/g, `v2rayng://install-config?url=${encodeURIComponent(subXrayUrl)}#${encodedSubName}`)
-      .replace(/{{URL_CLASH}}/g, `clash://install-config?url=${encodeURIComponent(`https://revil-sub.pages.dev/sub/clash-meta?url=${subSbUrl}`)}`)
-      .replace(/{{URL_EXCLAVE}}/g, `sn://subscription?url=${encodeURIComponent(subSbUrl)}&name=${encodedSubName}`);
+      .replace(
+        /{{URL_V2RAYNG}}/g,
+        `v2rayng://install-config?url=${encodeURIComponent(subXrayUrl)}#${encodedSubName}`,
+      )
+      .replace(
+        /{{URL_CLASH}}/g,
+        `clash://install-config?url=${encodeURIComponent(`https://revil-sub.pages.dev/sub/clash-meta?url=${subSbUrl}`)}`,
+      )
+      .replace(
+        /{{URL_EXCLAVE}}/g,
+        `sn://subscription?url=${encodeURIComponent(subSbUrl)}&name=${encodedSubName}`,
+      );
 
     return new Response(finalHTML, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   } catch (error) {
-    return new Response(`Error rendering panel: ${error.message}`, { status: 500, headers: { "Content-Type": "text/plain" } });
+    return new Response(`Error rendering panel: ${error.message}`, {
+      status: 500,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 }
 
@@ -451,14 +676,23 @@ export default {
         return ProtocolOverWSHandler(request, requestConfig);
       }
 
+      if (url.pathname === "/resolve-domain") return handleResolveDomain(request);
       if (url.pathname === "/scamalytics-lookup") return handleScamalyticsLookup(request, cfg);
-      if (url.pathname.startsWith(`/xray/${cfg.userID}`)) return handleIpSubscription(request, "xray", cfg.userID, url.hostname, ctx);
-      if (url.pathname.startsWith(`/sb/${cfg.userID}`)) return handleIpSubscription(request, "sb", cfg.userID, url.hostname, ctx);
-      if (url.pathname.startsWith(`/${cfg.userID}`)) return handleConfigPage(cfg.userID, url.hostname, cfg.proxyAddress);
+      if (url.pathname.startsWith(`/xray/${cfg.userID}`))
+        return handleIpSubscription(request, "xray", cfg.userID, url.hostname, ctx);
+      if (url.pathname.startsWith(`/sb/${cfg.userID}`))
+        return handleIpSubscription(request, "sb", cfg.userID, url.hostname, ctx);
+      if (url.pathname.startsWith(`/${cfg.userID}`))
+        return handleConfigPage(cfg.userID, url.hostname, cfg.proxyAddress);
 
-      return new Response("UUID not found. Please set the UUID environment variable.", { status: 404 });
+      return new Response("UUID not found. Please set the UUID environment variable.", {
+        status: 404,
+      });
     } catch (err) {
-      return new Response(`Worker Logic Error: ${err.message}\n${err.stack}`, { status: 500, headers: { "Content-Type": "text/plain" } });
+      return new Response(`Worker Logic Error: ${err.message}\n${err.stack}`, {
+        status: 500,
+        headers: { "Content-Type": "text/plain" },
+      });
     }
   },
 };
