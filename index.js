@@ -3,7 +3,7 @@ import init, { processVlessHeader } from "./pkg/zr_wasm.js";
 import wasm from "./pkg/zr_wasm_bg.wasm";
 
 const decodeSecure = (encoded) => atob(encoded);
-const HTML_URL = "https://nscl5.github.io/zr/";
+const HTML_URL = "https://nscl5.github.io/zr";
 
 const Config = {
   userID: "be0ff9df-1468-41a0-8865-796d1c6800db",
@@ -419,6 +419,33 @@ async function handleConfigPage(userID, hostName, proxyAddress) {
   const subXrayUrl = `https://${hostName}/xray/${userID}?name=${encodedSubName}`;
   const subSbUrl = `https://${hostName}/sb/${userID}?name=${encodedSubName}`;
 
+  const proxyDomain = proxyAddress.split(":")[0];
+  let proxyIp = proxyDomain;
+  let proxyLocation = "Germany";
+  let proxyIsp = "Global Connectivity Solutions LLP";
+
+  if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(proxyDomain)) {
+    try {
+      const dnsRes = await safeFetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(proxyDomain)}&type=A`, {
+        headers: { "accept": "application/dns-json" }
+      }, 3000);
+      if (dnsRes.ok) {
+        const dnsData = await dnsRes.json();
+        const ipAnswer = dnsData.Answer?.find((a) => a.type === 1);
+        if (ipAnswer) proxyIp = ipAnswer.data;
+      }
+    } catch (e) { console.error("Server DNS resolution failed", e); }
+  }
+
+  try {
+    const geoRes = await safeFetch(`https://freeipapi.com/api/json/${proxyIp}`, {}, 3000);
+    if (geoRes.ok) {
+      const geoData = await geoRes.json();
+      proxyLocation = [geoData.cityName, geoData.countryName].filter(Boolean).join(", ") || "Germany";
+      proxyIsp = geoData.asName || "Global Connectivity Solutions LLP";
+    }
+  } catch (e) { console.error("Server IP Geolocation failed", e); }
+
   try {
     const response = await safeFetch(HTML_URL);
     if (!response.ok) throw new Error(`Failed to load HTML from GitHub Pages: ${response.status}`);
@@ -426,6 +453,9 @@ async function handleConfigPage(userID, hostName, proxyAddress) {
     let finalHTML = await response.text();
     finalHTML = finalHTML
       .replace(/{{PROXY_ADDRESS}}/g, proxyAddress)
+      .replace(/{{PROXY_IP}}/g, proxyIp)
+      .replace(/{{PROXY_LOCATION}}/g, proxyLocation)
+      .replace(/{{PROXY_ISP}}/g, proxyIsp)
       .replace(/{{CONFIG_DREAM}}/g, dream)
       .replace(/{{CONFIG_FREEDOM}}/g, freedom)
       .replace(/{{URL_HIDDIFY}}/g, `hiddify://install-config?url=${encodeURIComponent(subXrayUrl)}`)
