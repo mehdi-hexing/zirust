@@ -492,7 +492,7 @@
       <p>
         © <span id="current-year"></span> REvil — All Rights Reserved
       </p>
-      <p>Secure. Private. Fast.</p>
+      <p>Freedom to Dream</p>
     </div>
   </div>
 
@@ -569,131 +569,7 @@
             }, 1500);
           });
       }
-
-      async function fetchClientPublicIP() {
-        try {
-          const response = await fetch("https://api.ipify.org?format=json");
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return (await response.json()).ip;
-        } catch (error) {
-          console.error("Error fetching client IP:", error);
-          return null;
-        }
-      }
-
-      async function fetchScamalyticsClientInfo(clientIp) {
-        if (!clientIp) return null;
-        try {
-          const response = await fetch(`/scamalytics-lookup?ip=${encodeURIComponent(clientIp)}`);
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(
-              `Worker request failed! status: ${response.status}, details: ${errorText}`,
-            );
-          }
-          const data = await response.json();
-          if (data.scamalytics && data.scamalytics.status === "error") {
-            throw new Error(data.scamalytics.error || "Scamalytics API error via Worker");
-          }
-          return data;
-        } catch (error) {
-          console.error("Error fetching from Scamalytics via Worker:", error);
-          return null;
-        }
-      }
-
-      function updateScamalyticsClientDisplay(data) {
-        const prefix = "client";
-        if (!data || !data.scamalytics || data.scamalytics.status !== "ok") {
-          showError(
-            prefix,
-            (data && data.scamalytics && data.scamalytics.error) ||
-              "Could not load client data from Scamalytics",
-          );
-          return;
-        }
-
-        const sa = data.scamalytics;
-        const ext = data.external_datasources || {};
-
-        const ipinfo = ext.ipinfo || {};
-        const maxmind = ext.maxmind_geolite2 || {};
-        const dbip = ext.dbip || {};
-
-        const elements = {
-          ip: document.getElementById(`${prefix}-ip`),
-          location: document.getElementById(`${prefix}-location`),
-          isp: document.getElementById(`${prefix}-isp`),
-          proxy: document.getElementById(`${prefix}-proxy`),
-        };
-
-        const isValid = (val) =>
-          val && val !== "PREMIUM FIELD - upgrade to view" && val.trim() !== "";
-
-        if (elements.ip) elements.ip.textContent = sa.ip || "N/A";
-
-        let ispName = "N/A";
-        if (isValid(ipinfo.as_name)) ispName = ipinfo.as_name;
-        else if (isValid(maxmind.as_name)) ispName = maxmind.as_name;
-        else if (isValid(sa.scamalytics_isp)) ispName = sa.scamalytics_isp;
-        else if (isValid(dbip.isp_name)) ispName = dbip.isp_name;
-
-        if (elements.isp) elements.isp.textContent = ispName;
-
-        if (elements.location) {
-          let city = "";
-          let countryName = "";
-          let countryCode = "";
-
-          if (isValid(maxmind.ip_city)) city = maxmind.ip_city;
-          else if (isValid(dbip.ip_city)) city = dbip.ip_city;
-
-          if (isValid(ipinfo.ip_country_name)) {
-            countryName = ipinfo.ip_country_name;
-            countryCode = ipinfo.ip_country_code;
-          } else if (isValid(maxmind.ip_country_name)) {
-            countryName = maxmind.ip_country_name;
-            countryCode = maxmind.ip_country_code;
-          } else if (isValid(dbip.ip_country_name)) {
-            countryName = dbip.ip_country_name;
-            countryCode = dbip.ip_country_code;
-          }
-
-          countryCode = countryCode ? countryCode.toLowerCase() : "";
-
-          let flagElementHtml = countryCode
-            ? `<img src="https://flagcdn.com/w20/${countryCode}.png" srcset="https://flagcdn.com/w40/${countryCode}.png 2x" alt="${countryCode}" class="country-flag"> `
-            : "";
-          let textPart = [city, countryName].filter(Boolean).join(", ");
-
-          elements.location.innerHTML =
-            flagElementHtml || textPart ? `${flagElementHtml}${textPart}`.trim() : "N/A";
-        }
-
-        if (elements.proxy) {
-          const score = sa.scamalytics_score;
-          const risk = sa.scamalytics_risk;
-          let riskText = "Unknown";
-          let badgeClass = "badge-neutral";
-          if (risk && score !== undefined) {
-            riskText = `${score} - ${risk.charAt(0).toUpperCase() + risk.slice(1)}`;
-            switch (risk.toLowerCase()) {
-              case "low":
-                badgeClass = "badge-yes";
-                break;
-              case "medium":
-                badgeClass = "badge-warning";
-                break;
-              case "high":
-              case "very high":
-                badgeClass = "badge-no";
-                break;
-            }
-          }
-          elements.proxy.innerHTML = `<span class="badge ${badgeClass}">${riskText}</span>`;
-        }
-      }
-
+      
       function updateIpApiIoDisplay(geo, prefix, originalHost) {
         const hostElement = document.getElementById(`${prefix}-host`);
         if (hostElement) hostElement.textContent = originalHost || "N/A";
@@ -737,6 +613,48 @@
         }
       }
 
+      function updateClientDisplay(data) {
+        const prefix = "client";
+        const elements = {
+          ip: document.getElementById(`${prefix}-ip`),
+          location: document.getElementById(`${prefix}-location`),
+          isp: document.getElementById(`${prefix}-isp`),
+          proxy: document.getElementById(`${prefix}-proxy`),
+        };
+
+        if (elements.ip) elements.ip.textContent = data.ip || "N/A";
+        if (elements.isp) elements.isp.textContent = data.isp || "N/A";
+
+        if (elements.location) {
+          const countryCode = data.country ? data.country.toLowerCase() : "";
+          const flagElementHtml = (countryCode && countryCode !== "n/a")
+            ? `<img src="https://flagcdn.com/w20/${countryCode}.png" srcset="https://flagcdn.com/w40/${countryCode}.png 2x" alt="${data.country}" class="country-flag"> `
+            : "";
+          const textPart = [data.city, data.country].filter(Boolean).join(", ");
+          elements.location.innerHTML =
+            flagElementHtml || textPart ? `${flagElementHtml}${textPart}`.trim() : "N/A";
+        }
+
+        if (elements.proxy) {
+          const score = data.threatScore;
+          const risk = data.risk;
+          let badgeClass = "badge-neutral";
+          
+          switch (risk.toLowerCase()) {
+            case "low":
+              badgeClass = "badge-yes";
+              break;
+            case "medium":
+              badgeClass = "badge-warning";
+              break;
+            case "high":
+              badgeClass = "badge-no";
+              break;
+          }
+          elements.proxy.innerHTML = `<span class="badge ${badgeClass}">${score} - ${risk} Risk</span>`;
+        }
+      }
+
       function showError(prefix, message = "Could not load data", originalHostForProxy = null) {
         const errorMessage = "N/A";
         const elements =
@@ -754,6 +672,56 @@
           else el.innerHTML = errorMessage;
         });
         console.warn(`${prefix} data loading failed: ${message}`);
+      }
+
+      async function loadNetworkInfo() {
+        try {
+          const proxyIpWithPort = document.body.getAttribute("data-proxy-ip") || "N/A";
+          const proxyDomainOrIp = proxyIpWithPort.split(":")[0];
+          const proxyHostEl = document.getElementById("proxy-host");
+          if (proxyHostEl) proxyHostEl.textContent = proxyIpWithPort;
+
+          if (proxyDomainOrIp && proxyDomainOrIp !== "N/A") {
+            let resolvedProxyIp = proxyDomainOrIp;
+            if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(proxyDomainOrIp)) {
+              try {
+                const dnsRes = await fetch(`/resolve-domain?domain=${encodeURIComponent(proxyDomainOrIp)}`);
+                if (dnsRes.ok) {
+                  const dnsData = await dnsRes.json();
+                  if (dnsData.ip) resolvedProxyIp = dnsData.ip;
+                }
+              } catch (e) {
+                console.error("DNS resolution for proxy failed:", e);
+              }
+            }
+            const proxyGeoData = await fetchIpApiIoInfo(resolvedProxyIp);
+            updateIpApiIoDisplay(proxyGeoData, "proxy", proxyIpWithPort);
+          } else {
+            showError("proxy", "Proxy Host not available", proxyIpWithPort);
+          }
+
+          try {
+            const clientRes = await fetch("/my-connection");
+            if (clientRes.ok) {
+              const clientData = await clientRes.json();
+              updateClientDisplay(clientData);
+            } else {
+              throw new Error("Failed to fetch connection details");
+            }
+          } catch (e) {
+            console.error("Error loading client info:", e);
+            showError("client", "Could not load client IP details.");
+          }
+
+        } catch (error) {
+          console.error("Overall network info loading failed:", error);
+          showError(
+            "proxy",
+            `Error: ${error.message}`,
+            document.body.getAttribute("data-proxy-ip") || "N/A",
+          );
+          showError("client", `Error: ${error.message}`);
+        }
       }
 
       function rebuildVlessLink(baseLink, newHost, newPort, newName) {
@@ -806,52 +774,6 @@
           document.getElementById('btn-copy-custom').onclick = function() { copyToClipboard(this, outputText); };
         } else {
           card.style.display = 'none';
-        }
-      }
-
-      async function loadNetworkInfo() {
-        try {
-          const proxyIpWithPort = document.body.getAttribute("data-proxy-ip") || "N/A";
-          const proxyDomainOrIp = proxyIpWithPort.split(":")[0];
-          const proxyHostEl = document.getElementById("proxy-host");
-          if (proxyHostEl) proxyHostEl.textContent = proxyIpWithPort;
-
-          if (proxyDomainOrIp && proxyDomainOrIp !== "N/A") {
-            let resolvedProxyIp = proxyDomainOrIp;
-              if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(proxyDomainOrIp)) {
-              try {
-                const dnsRes = await fetch(`/resolve-domain?domain=${encodeURIComponent(proxyDomainOrIp)}`);
-                if (dnsRes.ok) {
-                  const dnsData = await dnsRes.json();
-                  if (dnsData.ip) resolvedProxyIp = dnsData.ip;
-                }
-              } catch (e) {
-                console.error("DNS resolution for proxy failed:", e);
-              }
-            }
-            const proxyGeoData = await fetchIpApiIoInfo(resolvedProxyIp);
-            updateIpApiIoDisplay(proxyGeoData, "proxy", proxyIpWithPort);
-          } else {
-            showError("proxy", "Proxy Host not available", proxyIpWithPort);
-          }
-
-          const clientIp = await fetchClientPublicIP();
-          if (clientIp) {
-            const clientIpElement = document.getElementById("client-ip");
-            if (clientIpElement) clientIpElement.textContent = clientIp;
-            const scamalyticsData = await fetchScamalyticsClientInfo(clientIp);
-            updateScamalyticsClientDisplay(scamalyticsData);
-          } else {
-            showError("client", "Could not determine your IP address.");
-          }
-        } catch (error) {
-          console.error("Overall network info loading failed:", error);
-          showError(
-            "proxy",
-            `Error: ${error.message}`,
-            document.body.getAttribute("data-proxy-ip") || "N/A",
-          );
-          showError("client", `Error: ${error.message}`);
         }
       }
 
