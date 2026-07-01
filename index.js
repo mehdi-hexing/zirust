@@ -9,11 +9,6 @@ const HTML_URL = "https://nscl5.github.io/zr/";
 const Config = {
   userID: "be0ff9df-1468-41a0-8865-796d1c6800db",
   proxyIPs: ["nima.nscl.ir:443"],
-  scamalytics: {
-    username: "victoriacrossn",
-    apiKey: "ed89b4fef21aba43c15cdd15cff2138dd8d3bbde5aaaa4690ad8e94990448516",
-    baseUrl: "https://api12.scamalytics.com/v3/",
-  },
 
   fromEnv(env) {
     const selectedProxyIP =
@@ -25,11 +20,6 @@ const Config = {
       proxyIP: proxyHost,
       proxyPort: proxyPort,
       proxyAddress: selectedProxyIP,
-      scamalytics: {
-        username: env.SCAMALYTICS_USERNAME || this.scamalytics.username,
-        apiKey: env.SCAMALYTICS_API_KEY || this.scamalytics.apiKey,
-        baseUrl: env.SCAMALYTICS_BASEURL || this.scamalytics.baseUrl,
-      },
     };
   },
 };
@@ -530,46 +520,28 @@ async function createDnsPipeline(webSocket, vlessResponseHeader, log) {
   return { write: (chunk) => writer.write(chunk) };
 }
 
-async function handleScamalyticsLookup(request, config) {
-  const url = new URL(request.url);
-  const ipToLookup = url.searchParams.get("ip");
-  if (!ipToLookup)
-    return new Response(JSON.stringify({ error: "Missing IP" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+async function handleMyConnection(request) {
+  const clientIP = request.headers.get("CF-Connecting-IP") || "127.0.0.1";
+  const cf = request.cf || {};
 
-  const cache = caches.default;
-  const cacheKey = new Request(`https://scam-cache.local/${ipToLookup}`);
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
+  const threatScore = cf.threatScore || 0;
+  let risk = "Low";
+  if (threatScore > 15) risk = "Medium";
+  if (threatScore > 49) risk = "High";
 
-  const { username, apiKey, baseUrl } = config.scamalytics;
-  if (!username || !apiKey)
-    return new Response(JSON.stringify({ error: "Scamalytics API not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-
-  const scamalyticsUrl = `${baseUrl}${username}/?key=${apiKey}&ip=${ipToLookup}`;
-  const headers = new Headers({
+  const headers = {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Cache-Control": "public, max-age=43200",
-  });
+    "Access-Control-Allow-Origin": "*"
+  };
 
-  try {
-    const scamalyticsResponse = await fetch(scamalyticsUrl);
-    const body = await scamalyticsResponse.text();
-    const response = new Response(body, { headers });
-    await cache.put(cacheKey, response.clone());
-    return response;
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.toString() }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  return new Response(JSON.stringify({
+    ip: clientIP,
+    country: cf.country || "N/A",
+    city: cf.city || "",
+    isp: cf.asOrganization || "N/A",
+    threatScore: threatScore,
+    risk: risk
+  }), { headers });
 }
 
 async function handleResolveDomain(request) {
@@ -676,8 +648,10 @@ export default {
         return ProtocolOverWSHandler(request, requestConfig);
       }
 
-      if (url.pathname === "/resolve-domain") return handleResolveDomain(request);
-      if (url.pathname === "/scamalytics-lookup") return handleScamalyticsLookup(request, cfg);
+      if (url.pathname === '/resolve-domain')
+        return handleResolveDomain(request);
+      if (url.pathname === '/my-connection')
+        return handleMyConnection(request);
       if (url.pathname.startsWith(`/xray/${cfg.userID}`))
         return handleIpSubscription(request, "xray", cfg.userID, url.hostname, ctx);
       if (url.pathname.startsWith(`/sb/${cfg.userID}`))
