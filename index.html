@@ -4,15 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VLESS Proxy Configuration</title>
-    <link
-      rel="icon"
-      href="https://pub-b3ab4c8172fb44e29854df3435aa223d.r2.dev/raven.png"
-      type="image/png"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="icon" href="https://pub-b3ab4c8172fb44e29854df3435aa223d.r2.dev/raven.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
     <style>
       * {
         margin: 0;
@@ -39,6 +32,19 @@
       body {
         background-color: var(--color-canvas-default);
         color: var(--color-fg-default);
+        scroll-behavior: smooth;
+      }
+
+      button,
+      input {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
       }
 
       body {
@@ -285,10 +291,6 @@
         border-top: 1px solid var(--color-border-muted);
         color: var(--color-fg-muted);
         font-size: 12px;
-      }
-
-      .footer p {
-        margin-bottom: 4px;
       }
 
       ::-webkit-scrollbar {
