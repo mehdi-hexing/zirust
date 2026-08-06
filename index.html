@@ -1,1370 +1,1311 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#22272e">
-<meta name="description" content="VLESS proxy configuration dashboard">
-<title>VLESS Proxy Configuration</title>
-<style>
-:root {
-  color-scheme: dark;
-  --canvas-default: #22272e;
-  --canvas-subtle: #2d333b;
-  --canvas-inset: #1c2128;
-  --canvas-overlay: #2d333b;
-  --border-default: #444c56;
-  --border-muted: #373e47;
-  --fg-default: #adbac7;
-  --fg-muted: #768390;
-  --fg-subtle: #636e7b;
-  --fg-on-emphasis: #cdd9e5;
-  --accent-fg: #539bf5;
-  --accent-emphasis: #316dca;
-  --accent-muted: rgba(83, 155, 245, 0.4);
-  --accent-subtle: rgba(65, 132, 228, 0.1);
-  --success-fg: #57ab5a;
-  --success-emphasis: #347d39;
-  --success-subtle: rgba(70, 154, 74, 0.15);
-  --attention-fg: #c69026;
-  --attention-emphasis: #966600;
-  --attention-subtle: rgba(174, 124, 20, 0.15);
-  --danger-fg: #e5534b;
-  --danger-emphasis: #c93c37;
-  --danger-subtle: rgba(229, 83, 75, 0.1);
-  --neutral-emphasis: #636e7b;
-  --neutral-muted: rgba(99, 110, 123, 0.4);
-  --neutral-subtle: rgba(99, 110, 123, 0.1);
-  --btn-bg: #343b44;
-  --btn-hover-bg: #3d444d;
-  --btn-active-bg: #2d333b;
-  --btn-border: rgba(205, 217, 229, 0.15);
-  --focus: #539bf5;
-  --shadow-large: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --overlay-backdrop: rgba(28, 33, 40, 0.7);
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
-html,
-body {
-  scroll-behavior: smooth;
-}
-
-button,
-input {
-  -webkit-tap-highlight-color: transparent;
-}
-  
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 400;
-  color: var(--fg-default);
-  background-color: var(--canvas-default);
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, p, pre {
-  margin: 0;
-}
-
-a {
-  color: var(--accent-fg);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-svg {
-  display: block;
-}
-
-strong {
-  font-weight: 600;
-}
-
-::selection {
-  background: var(--accent-muted);
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
-}
-
-:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
-  border-radius: 6px;
-}
-
-.octicon {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  flex: none;
-}
-
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 32;
-  background: var(--canvas-default);
-  border-bottom: 1px solid var(--border-muted);
-}
-
-.header-inner {
-  max-width: 1012px;
-  margin: 0 auto;
-  padding: 0 16px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.brand-mark {
-  display: flex;
-  color: var(--fg-default);
-}
-
-.brand-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-default);
-  white-space: nowrap;
-}
-
-.brand-sep {
-  color: var(--fg-subtle);
-}
-
-.brand-sub {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--fg-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.app-main {
-  max-width: 1012px;
-  margin: 0 auto;
-  padding: 24px 16px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.page-head h1 {
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--fg-default);
-}
-
-.page-head p {
-  margin-top: 4px;
-  font-size: 14px;
-  color: var(--fg-muted);
-}
-
-.box {
-  background: var(--canvas-default);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-}
-
-.box-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--canvas-subtle);
-  border-bottom: 1px solid var(--border-muted);
-  border-radius: 6px 6px 0 0;
-}
-
-.box-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-default);
-  min-width: 0;
-}
-
-.box-title .octicon {
-  color: var(--fg-muted);
-}
-
-.box-body {
-  padding: 16px;
-}
-
-.box-footer {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 16px;
-  border-top: 1px solid var(--border-muted);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 5px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  color: var(--fg-default);
-  background: var(--btn-bg);
-  border: 1px solid var(--btn-border);
-  border-radius: 6px;
-  white-space: nowrap;
-  user-select: none;
-  text-decoration: none;
-  transition: background-color 0.1s ease, border-color 0.1s ease;
-}
-
-.btn:hover {
-  background: var(--btn-hover-bg);
-  text-decoration: none;
-}
-
-.btn:active {
-  background: var(--btn-active-bg);
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.btn-sm {
-  padding: 3px 12px;
-  font-size: 12px;
-}
-
-.btn-primary {
-  color: #ffffff;
-  background: var(--success-emphasis);
-}
-
-.btn-primary:hover {
-  background: #3f8e43;
-}
-
-.btn-primary:active {
-  background: #2e7031;
-}
-
-.btn .icon-check {
-  display: none;
-}
-
-.btn.is-copied .icon-check {
-  display: block;
-  color: var(--success-fg);
-}
-
-.btn.is-copied .icon-copy {
-  display: none;
-}
-
-.icon-spin {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--accent-fg);
-}
-
-.link-btn:hover {
-  text-decoration: underline;
-}
-
-.net-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.net-panel {
-  padding: 16px;
-  min-width: 0;
-}
-
-.net-panel:first-child {
-  border-right: 1px solid var(--border-muted);
-}
-
-.net-panel-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg-muted);
-  margin-bottom: 8px;
-}
-
-.meta-row {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-muted);
-}
-
-.meta-row:last-child {
-  border-bottom: none;
-}
-
-.meta-label {
-  font-size: 12px;
-  color: var(--fg-muted);
-}
-
-.meta-value {
-  font-size: 14px;
-  color: var(--fg-default);
-  overflow-wrap: anywhere;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.meta-value.is-empty {
-  color: var(--fg-muted);
-}
-
-.label {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  border: 1px solid;
-  border-radius: 2em;
-  white-space: nowrap;
-}
-
-.label--success {
-  color: var(--success-fg);
-  border-color: rgba(87, 171, 90, 0.4);
-  background: var(--success-subtle);
-}
-
-.label--warning {
-  color: var(--attention-fg);
-  border-color: rgba(198, 144, 38, 0.4);
-  background: var(--attention-subtle);
-}
-
-.label--danger {
-  color: var(--danger-fg);
-  border-color: rgba(229, 83, 75, 0.4);
-  background: var(--danger-subtle);
-}
-
-.label--muted {
-  color: var(--fg-muted);
-  border-color: var(--neutral-muted);
-  background: var(--neutral-subtle);
-}
-
-.skeleton {
-  display: inline-block;
-  height: 12px;
-  border-radius: 6px;
-  background: var(--neutral-muted);
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-.sk-sm { width: 64px; }
-.sk-md { width: 112px; }
-.sk-lg { width: 160px; }
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.25; }
-}
-
-.code-block {
-  background: var(--canvas-inset);
-  border: 1px solid var(--border-muted);
-  border-radius: 6px;
-  padding: 16px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--fg-default);
-  white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 280px;
-  overflow: auto;
-  user-select: text;
-}
-
-.empty-state {
-  font-size: 14px;
-  color: var(--fg-muted);
-}
-
-.form-control {
-  width: 100%;
-  padding: 5px 12px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--fg-default);
-  background: var(--canvas-default);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  transition: border-color 0.1s ease;
-}
-
-.form-control::placeholder {
-  color: var(--fg-subtle);
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: var(--accent-fg);
-}
-
-textarea.form-control {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
-  padding: 8px 12px;
-  min-height: 176px;
-  resize: vertical;
-}
-
-.modal-wrap {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 48px 16px;
-  overflow-y: auto;
-  background: var(--overlay-backdrop);
-}
-
-.modal-wrap[hidden] {
-  display: none;
-}
-
-.modal {
-  width: 100%;
-  max-width: 448px;
-  background: var(--canvas-overlay);
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  box-shadow: var(--shadow-large);
-  animation: modal-in 0.12s ease;
-}
-
-@keyframes modal-in {
-  from {
-    opacity: 0.5;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 8px 8px 16px;
-  border-bottom: 1px solid var(--border-muted);
-}
-
-.modal-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--fg-default);
-}
-
-.modal-title .octicon {
-  color: var(--fg-muted);
-}
-
-.modal-close {
-  display: flex;
-  padding: 8px;
-  border-radius: 6px;
-  color: var(--fg-muted);
-  transition: background-color 0.1s ease, color 0.1s ease;
-}
-
-.modal-close:hover {
-  background: var(--neutral-subtle);
-  color: var(--fg-default);
-}
-
-.modal-body {
-  padding: 16px;
-}
-
-.modal-body > p {
-  margin-bottom: 16px;
-}
-
-.modal-desc {
-  color: var(--fg-muted);
-}
-
-.dns-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background: var(--canvas-inset);
-  border: 1px solid var(--border-muted);
-  border-radius: 6px;
-}
-
-.dns-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.dns-label {
-  flex: none;
-  width: 40px;
-  font-size: 12px;
-  color: var(--fg-muted);
-}
-
-.code-inline {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  padding: 2px 8px;
-  background: var(--neutral-muted);
-  border-radius: 6px;
-  color: var(--fg-default);
-  overflow-wrap: anywhere;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 16px;
-  border-top: 1px solid var(--border-muted);
-}
-
-body.modal-open {
-  overflow: hidden;
-}
-
-.toast-region {
-  position: fixed;
-  left: 16px;
-  bottom: 16px;
-  z-index: 120;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 320px;
-  padding: 8px 16px;
-  font-size: 14px;
-  color: var(--fg-default);
-  background: var(--canvas-overlay);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  box-shadow: var(--shadow-large);
-  animation: toast-in 0.15s ease;
-}
-
-.toast .octicon {
-  color: var(--success-fg);
-}
-
-.toast-out {
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.app-footer {
-  max-width: 1012px;
-  margin: 0 auto;
-  padding: 24px 16px 32px;
-  border-top: 1px solid var(--border-muted);
-  font-size: 12px;
-  color: var(--fg-muted);
-}
-
-@media (max-width: 767px) {
-  .net-grid {
-    grid-template-columns: 1fr;
-  }
-  .net-panel:first-child {
-    border-right: none;
-    border-bottom: 1px solid var(--border-muted);
-  }
-  .modal-wrap {
-    padding: 16px;
-  }
-  .code-block {
-    max-height: 220px;
-  }
-}
-
-@media (max-width: 480px) {
-  .brand-sep,
-  .brand-sub {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-</style>
-</head>
-<body>
-
-<header class="app-header">
-  <div class="header-inner">
-    <div class="brand">
-      <span class="brand-mark">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="m8.533.133a1.75 1.75 0 0 0-1.066 0l-5.25 1.68A1.75 1.75 0 0 0 1 3.48V7c0 1.566.32 3.182 1.303 4.682.983 1.498 2.585 2.813 5.032 3.855a1.697 1.697 0 0 0 1.33 0c2.447-1.042 4.049-2.357 5.032-3.855C14.68 10.182 15 8.566 15 7V3.48a1.75 1.75 0 0 0-1.217-1.667Zm-.61 1.429a.25.25 0 0 1 .153 0l5.25 1.68a.25.25 0 0 1 .174.238V7c0 1.358-.275 2.666-1.057 3.86-.784 1.194-2.121 2.34-4.366 3.297a.196.196 0 0 1-.154 0c-2.245-.956-3.582-2.104-4.366-3.298C2.275 9.666 2 8.358 2 7V3.48a.25.25 0 0 1 .174-.237l5.25-1.68ZM11.28 6.28l-3.5 3.5a.75.75 0 0 1-1.06 0l-1.5-1.5a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l.97.97 2.97-2.97a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/></svg>
-      </span>
-      <span class="brand-name">VLESS Proxy</span>
-      <span class="brand-sep">/</span>
-      <span class="brand-sub">Configuration Dashboard</span>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0d1117" />
+  <title>VLESS Proxy Configuration</title>
+  <link rel="icon" href="https://pub-b3ab4c8172fb44e29854df3435aa223d.r2.dev/raven.png" type="image/png">
+  <style>
+    :root {
+      --canvas: #0d1117;
+      --canvas-subtle: #161b22;
+      --canvas-inset: #010409;
+      --overlay: #1f242d;
+      --border-default: #30363d;
+      --border-muted: #21262d;
+      --fg-default: #c9d1d9;
+      --fg-muted: #8b949e;
+      --fg-subtle: #6e7681;
+      --accent: #2f81f7;
+      --accent-emphasis: #1f6feb;
+      --accent-muted: rgba(47, 129, 247, 0.16);
+      --selection: rgba(47, 129, 247, 0.28);
+      --focus: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --shadow-overlay: 0 8px 24px rgba(1, 4, 9, 0.28);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-mono: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+      --transition: 120ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 16px;
+      background: var(--canvas);
+      color: var(--fg-default);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::selection,
+    ::selection {
+      background: var(--selection);
+      color: var(--fg-default);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 4px 0 8px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+      line-height: 1.25;
+      font-weight: 600;
+      color: var(--fg-default);
+      letter-spacing: -0.01em;
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--fg-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .config-card {
+      background: var(--canvas-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin: 0;
+    }
+
+    .config-card:hover {
+      border-color: var(--border-default);
+    }
+
+    .config-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-muted);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg-default);
+      letter-spacing: 0;
+    }
+
+    .config-title > span {
+      min-width: 0;
+    }
+
+    .button,
+    .refresh-btn,
+    .copy-buttons,
+    .client-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background: var(--overlay);
+      color: var(--fg-default);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      text-decoration: none;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition), opacity var(--transition);
+      overflow: hidden;
+    }
+
+    .button:hover,
+    .refresh-btn:hover,
+    .copy-buttons:hover,
+    .client-btn:hover {
+      background: #30363d;
+      border-color: #8b949e;
+      color: var(--fg-default);
+      text-decoration: none;
+    }
+
+    .button:active,
+    .refresh-btn:active,
+    .copy-buttons:active,
+    .client-btn:active {
+      background: #262c36;
+      border-color: var(--border-default);
+    }
+
+    .button:focus-visible,
+    .refresh-btn:focus-visible,
+    .copy-buttons:focus-visible,
+    .client-btn:focus-visible,
+    .modal-textarea:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .button:disabled,
+    .refresh-btn:disabled,
+    .copy-buttons:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .refresh-btn,
+    .copy-buttons {
+      font-size: 12px;
+      padding-inline: 10px;
+      background: #21262d;
+    }
+
+    .refresh-icon,
+    .copy-icon {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 auto;
+      stroke: currentColor;
+    }
+
+    .config-content {
+      background: var(--canvas-inset);
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .config-content pre {
+      margin: 0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--fg-default);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.55;
+      user-select: text;
+    }
+
+    .client-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 0;
+    }
+
+    .client-btn {
+      width: 100%;
+      justify-content: flex-start;
+      padding-inline: 12px;
+      background: #21262d;
+      color: var(--fg-default);
+      border-color: var(--border-default);
+    }
+
+    .client-btn .button-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .client-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      background: var(--canvas);
+      border: 1px solid var(--border-default);
+      color: var(--fg-muted);
+    }
+
+    .client-icon svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .button.copied {
+      background: rgba(63, 185, 80, 0.16) !important;
+      border-color: rgba(63, 185, 80, 0.38) !important;
+      color: #7ee787 !important;
+    }
+
+    .button.error {
+      background: rgba(248, 81, 73, 0.16) !important;
+      border-color: rgba(248, 81, 73, 0.38) !important;
+      color: #ff9b92 !important;
+    }
+
+    .ip-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .ip-info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      background: var(--canvas-inset);
+      border: 1px solid var(--border-muted);
+      border-radius: var(--radius-md);
+      min-width: 0;
+    }
+
+    .ip-info-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-muted);
+      min-width: 0;
+    }
+
+    .ip-info-header svg {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      stroke: var(--fg-muted);
+    }
+
+    .ip-info-header h3 {
+      margin: 0;
+      min-width: 0;
+      color: var(--fg-default);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .ip-info-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .ip-info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .ip-info-item .label {
+      font-size: 11px;
+      color: var(--fg-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .ip-info-item .value {
+      min-width: 0;
+      color: var(--fg-default);
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .badge-yes {
+      background: rgba(63, 185, 80, 0.14);
+      color: #7ee787;
+      border-color: rgba(63, 185, 80, 0.28);
+    }
+
+    .badge-warning {
+      background: rgba(210, 153, 34, 0.14);
+      color: #d29922;
+      border-color: rgba(210, 153, 34, 0.28);
+    }
+
+    .badge-no {
+      background: rgba(248, 81, 73, 0.14);
+      color: #ff7b72;
+      border-color: rgba(248, 81, 73, 0.28);
+    }
+
+    .badge-neutral {
+      background: rgba(88, 166, 255, 0.14);
+      color: #79c0ff;
+      border-color: rgba(88, 166, 255, 0.28);
+    }
+
+    .skeleton {
+      display: block;
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #21262d 25%, #30363d 37%, #21262d 63%);
+      background-size: 400% 100%;
+      animation: loading 1.4s ease infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        background-position: 100% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    .country-flag {
+      display: inline-block;
+      width: 18px;
+      height: auto;
+      max-height: 14px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+
+    .custom-routing-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: fit-content;
+      margin: 8px auto 0;
+      padding: 4px 0;
+      color: var(--fg-muted);
+      font-size: 12px;
+      line-height: 1.4;
+      cursor: pointer;
+      border-bottom: 1px dashed var(--border-default);
+      transition: color var(--transition), border-color var(--transition);
+    }
+
+    .custom-routing-trigger:hover {
+      color: var(--fg-default);
+      border-color: var(--fg-muted);
+      text-decoration: none;
+    }
+
+    .footer {
+      padding: 8px 0 16px;
+      text-align: left;
+      color: var(--fg-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border-default);
+    }
+
+    .footer b {
+      color: var(--fg-default);
+      font-weight: 600;
+    }
+
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--canvas);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border: 3px solid var(--canvas);
+      border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #484f58;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #30363d var(--canvas);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(1, 4, 9, 0.82);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      width: min(100%, 480px);
+      padding: 16px;
+      background: var(--canvas-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-overlay);
+      text-align: left;
+      transform: scale(0.98);
+      transition: transform var(--transition);
+    }
+
+    .modal-overlay.visible .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 600;
+      color: var(--fg-default);
+    }
+
+    .modal-text {
+      margin: 0 0 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--fg-default);
+    }
+
+    .modal-instruction {
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-muted);
+      background: var(--canvas-inset);
+      color: var(--fg-default);
+      font-size: 13px;
+      line-height: 1.65;
+      word-break: break-word;
+    }
+
+    .modal-instruction code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #161b22;
+      border: 1px solid var(--border-muted);
+      color: #79c0ff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      background: var(--canvas-inset);
+      color: var(--fg-default);
+      font: inherit;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.55;
+      resize: vertical;
+    }
+
+    .modal-textarea::placeholder {
+      color: var(--fg-subtle);
+    }
+
+    .modal-btn-group {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .modal-btn-secondary {
+      background: #21262d;
+      color: var(--fg-default);
+    }
+
+    #hiddify-modal-continue {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .config-card .client-buttons .client-btn,
+    .modal-btn-group .client-btn {
+      width: 100%;
+    }
+
+    .config-card .client-buttons .client-btn .button-text,
+    .modal-btn-group .client-btn .button-text {
+      white-space: nowrap;
+    }
+
+    .button svg,
+    .refresh-btn svg,
+    .copy-buttons svg {
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .ip-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        gap: 12px;
+      }
+
+      .config-card {
+        padding: 14px;
+      }
+
+      .client-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-btn-group {
+        grid-template-columns: 1fr;
+      }
+
+      .header p {
+        font-size: 12px;
+      }
+
+      .footer {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 10px;
+      }
+
+      .config-title {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .config-title .refresh-btn {
+        width: 100%;
+      }
+
+      .copy-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .ip-info-section,
+      .config-content,
+      .modal-content {
+        padding: 12px;
+      }
+
+      .client-btn {
+        min-height: 34px;
+      }
+
+      .button,
+      .refresh-btn,
+      .copy-buttons,
+      .client-btn {
+        font-size: 12px;
+      }
+
+      .ip-info-item .label {
+        font-size: 10px;
+      }
+
+      .ip-info-item .value {
+        font-size: 12px;
+      }
+    }
+  </style>
+
+  </head>
+  <body data-proxy-ip="{{PROXY_ADDRESS}}">
+    <div class="container">
+    <div class="header">
+      <h1>VLESS Proxy Configuration</h1>
+      <p>Copy the configuration or import directly into your client</p>
     </div>
-  </div>
-</header>
 
-<main class="app-main">
-
-  <div class="page-head">
-    <h1>VLESS Proxy Configuration</h1>
-    <p>Copy the configuration or import directly into your client</p>
-  </div>
-
-  <section class="box">
-    <div class="box-header">
-      <h2 class="box-title">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM5.78 8.75a9.64 9.64 0 0 0 1.363 4.177c.255.426.542.832.857 1.215.245-.296.551-.705.857-1.215A9.64 9.64 0 0 0 10.22 8.75Zm4.44-1.5a9.64 9.64 0 0 0-1.363-4.177c-.307-.51-.612-.919-.857-1.215a9.927 9.927 0 0 0-.857 1.215A9.64 9.64 0 0 0 5.78 7.25Zm-5.944 1.5H1.543a6.507 6.507 0 0 0 4.666 5.5c-.123-.181-.24-.365-.352-.552-.715-1.192-1.437-2.874-1.581-4.948Zm-2.733-1.5h2.733c.144-2.074.866-3.756 1.58-4.948.12-.197.237-.381.353-.552a6.507 6.507 0 0 0-4.666 5.5Zm10.181 1.5c-.144 2.074-.866 3.756-1.58 4.948-.12.197-.237.381-.353.552a6.507 6.507 0 0 0 4.666-5.5Zm2.733-1.5a6.507 6.507 0 0 0-4.666-5.5c.123.181.24.365.353.552.714 1.192 1.436 2.874 1.58 4.948Z"/></svg>
-        Network Information
-      </h2>
-      <button class="btn btn-sm" id="btn-refresh" type="button">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"/></svg>
-        <span class="btn-label">Refresh</span>
-      </button>
-    </div>
-    <div class="net-grid">
-      <section class="net-panel">
-        <h3 class="net-panel-title">Proxy Server</h3>
-        <div class="meta-row">
-          <span class="meta-label">Proxy Host</span>
-          <span class="meta-value" id="proxy-host"><span class="skeleton sk-lg"></span></span>
+    <div class="config-card">
+      <div class="config-title">
+        <span>Network Information</span>
+        <button id="refresh-ip-info" class="refresh-btn" aria-label="Refresh IP information">
+          <svg
+            class="refresh-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"
+            />
+          </svg>
+          Refresh
+        </button>
+      </div>
+      <div class="ip-info-grid">
+        <div class="ip-info-section">
+          <div class="ip-info-header">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1v16.8c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h6.9c.4 0 .8-.2 1.1-.5.3-.3.5-.7.5-1.1V3.6c0-.4-.2-.8-.5-1.1-.3-.3-.7-.5-1.1-.5z"
+              />
+              <circle cx="12" cy="18" r="1" />
+            </svg>
+            <h3>Proxy Server</h3>
+          </div>
+          <div class="ip-info-content">
+            <div class="ip-info-item">
+              <span class="label">Proxy Host</span
+              ><span class="value" id="proxy-host"
+                ><span class="skeleton" style="width: 150px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">IP Address</span
+              ><span class="value" id="proxy-ip"
+                ><span class="skeleton" style="width: 120px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">Location</span
+              ><span class="value" id="proxy-location"
+                ><span class="skeleton" style="width: 100px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">ISP Provider</span
+              ><span class="value" id="proxy-isp"
+                ><span class="skeleton" style="width: 140px"></span
+              ></span>
+            </div>
+          </div>
         </div>
-        <div class="meta-row">
-          <span class="meta-label">IP Address</span>
-          <span class="meta-value" id="proxy-ip"><span class="skeleton sk-md"></span></span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Location</span>
-          <span class="meta-value" id="proxy-location"><span class="skeleton sk-lg"></span></span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">ISP Provider</span>
-          <span class="meta-value" id="proxy-isp"><span class="skeleton sk-lg"></span></span>
-        </div>
-      </section>
-      <section class="net-panel">
-        <h3 class="net-panel-title">Your Connection</h3>
-        <div class="meta-row">
-          <span class="meta-label">Your IP</span>
-          <span class="meta-value" id="client-ip"><span class="skeleton sk-md"></span></span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Location</span>
-          <span class="meta-value" id="client-location"><span class="skeleton sk-lg"></span></span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">ISP Provider</span>
-          <span class="meta-value" id="client-isp"><span class="skeleton sk-lg"></span></span>
-        </div>
-        <div class="meta-row">
-          <span class="meta-label">Risk Score</span>
-          <span class="meta-value" id="client-risk"><span class="skeleton sk-sm"></span></span>
-        </div>
-      </section>
-    </div>
-  </section>
-
-  <section class="box">
-    <div class="box-header">
-      <h2 class="box-title">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M14.064 0h.186C15.216 0 16 .784 16 1.75v.186a8.752 8.752 0 0 1-2.564 6.186l-.458.459c-.314.314-.641.616-.979.904v3.207c0 .608-.315 1.172-.833 1.49l-2.774 1.707a.749.749 0 0 1-1.11-.418l-.954-3.102a1.214 1.214 0 0 1-.145-.125L3.754 9.816a1.218 1.218 0 0 1-.124-.145L.528 8.717a.749.749 0 0 1-.418-1.11l1.71-2.774A1.749 1.749 0 0 1 3.31 4h3.204c.288-.338.59-.665.904-.979l.459-.458A8.749 8.749 0 0 1 14.064 0ZM8.938 3.623h-.002l-.458.458c-.76.76-1.437 1.598-2.02 2.5l-1.5 2.317 2.143 2.143 2.317-1.5c.902-.583 1.74-1.26 2.499-2.02l.459-.458a7.25 7.25 0 0 0 2.123-5.127V1.75a.25.25 0 0 0-.25-.25h-.186a7.249 7.249 0 0 0-5.125 2.123ZM3.56 14.56c-.732.732-2.334 1.045-3.005 1.148a.234.234 0 0 1-.201-.064.234.234 0 0 1-.064-.201c.103-.671.416-2.273 1.15-3.003a1.502 1.502 0 1 1 2.12 2.12Zm6.94-3.935c-.088.06-.177.118-.266.175l-2.35 1.521.548 1.783 1.949-1.2a.25.25 0 0 0 .119-.213ZM3.678 8.116 5.2 5.766c.058-.09.117-.178.176-.266H3.309a.25.25 0 0 0-.213.119l-1.2 1.95ZM12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>
-        Xray Core Clients
-      </h2>
-      <button class="btn btn-sm" id="btn-copy-xray" type="button">
-        <svg class="octicon icon-copy" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 0 0-1.5h-1.5A3.25 3.25 0 0 0 0 6.75v6.5C0 14.216.784 15 1.75 15h6.5A3.25 3.25 0 0 0 11.5 11.75v-1.5a.75.75 0 0 0-1.5 0v1.5c0 .966-.784 1.75-1.75 1.75h-6.5A1.75 1.75 0 0 1 1.5 11.75v-6.5c0-.966.784-1.75 1.75-1.75H4.5a.75.75 0 0 0 0-1.5H1.75A3.25 3.25 0 0 0 0 6.75Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h6.5C14.216 0 15 .784 15 1.75v6.5A1.75 1.75 0 0 1 13.25 10h-6.5A1.75 1.75 0 0 1 5 8.25v-6.5Zm1.75-.25a.25.25 0 0 0-.25.25v6.5c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-6.5a.25.25 0 0 0-.25-.25h-6.5Z"/></svg>
-        <svg class="octicon icon-check" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>
-        <span class="btn-label">Copy</span>
-      </button>
-    </div>
-    <div class="box-body">
-      <pre class="code-block"><code id="config-dream">{{CONFIG_DREAM}}</code></pre>
-    </div>
-    <div class="box-footer">
-      <button class="btn" id="btn-import-hiddify" type="button">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>
-        Import to Hiddify
-      </button>
-      <a class="btn" href="{{URL_V2RAYNG}}">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>
-        Import to V2rayNG
-      </a>
-    </div>
-  </section>
-
-  <section class="box">
-    <div class="box-header">
-      <h2 class="box-title">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="m8.878.392 5.25 3.045c.54.314.872.89.872 1.514v6.098a1.75 1.75 0 0 1-.872 1.514l-5.25 3.045a1.75 1.75 0 0 1-1.756 0l-5.25-3.045A1.75 1.75 0 0 1 1 11.049V4.951c0-.624.332-1.201.872-1.514L7.122.392a1.75 1.75 0 0 1 1.756 0ZM7.875 1.69l-4.63 2.685L8 7.133l4.755-2.758-4.63-2.685a.248.248 0 0 0-.25 0ZM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432Zm6.25 8.271 4.625-2.683a.25.25 0 0 0 .125-.216V5.677l-4.75 2.755Z"/></svg>
-        Sing-Box Core Clients
-      </h2>
-      <button class="btn btn-sm" id="btn-copy-singbox" type="button">
-        <svg class="octicon icon-copy" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 0 0-1.5h-1.5A3.25 3.25 0 0 0 0 6.75v6.5C0 14.216.784 15 1.75 15h6.5A3.25 3.25 0 0 0 11.5 11.75v-1.5a.75.75 0 0 0-1.5 0v1.5c0 .966-.784 1.75-1.75 1.75h-6.5A1.75 1.75 0 0 1 1.5 11.75v-6.5c0-.966.784-1.75 1.75-1.75H4.5a.75.75 0 0 0 0-1.5H1.75A3.25 3.25 0 0 0 0 6.75Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h6.5C14.216 0 15 .784 15 1.75v6.5A1.75 1.75 0 0 1 13.25 10h-6.5A1.75 1.75 0 0 1 5 8.25v-6.5Zm1.75-.25a.25.25 0 0 0-.25.25v6.5c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-6.5a.25.25 0 0 0-.25-.25h-6.5Z"/></svg>
-        <svg class="octicon icon-check" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>
-        <span class="btn-label">Copy</span>
-      </button>
-    </div>
-    <div class="box-body">
-      <pre class="code-block"><code id="config-freedom">{{CONFIG_FREEDOM}}</code></pre>
-    </div>
-    <div class="box-footer">
-      <a class="btn" href="{{URL_CLASH}}">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>
-        Import to Clash Meta
-      </a>
-      <a class="btn" href="{{URL_EXCLAVE}}">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>
-        Import to Exclave
-      </a>
-    </div>
-  </section>
-
-  <section class="box">
-    <div class="box-header">
-      <h2 class="box-title">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H1.75A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm1 1.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/><path d="M1.75 12h8.5c.966 0 1.75.784 1.75 1.75v.5A1.75 1.75 0 0 1 10.25 16H1.75A1.75 1.75 0 0 1 0 14.25v-.5C0 12.784.784 12 1.75 12ZM1.5 13.75v.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm1 1.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>
-        Custom Clean IP Nodes
-      </h2>
-      <button class="btn btn-sm" id="btn-copy-clean" type="button" disabled>
-        <svg class="octicon icon-copy" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 0 0-1.5h-1.5A3.25 3.25 0 0 0 0 6.75v6.5C0 14.216.784 15 1.75 15h6.5A3.25 3.25 0 0 0 11.5 11.75v-1.5a.75.75 0 0 0-1.5 0v1.5c0 .966-.784 1.75-1.75 1.75h-6.5A1.75 1.75 0 0 1 1.5 11.75v-6.5c0-.966.784-1.75 1.75-1.75H4.5a.75.75 0 0 0 0-1.5H1.75A3.25 3.25 0 0 0 0 6.75Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h6.5C14.216 0 15 .784 15 1.75v6.5A1.75 1.75 0 0 1 13.25 10h-6.5A1.75 1.75 0 0 1 5 8.25v-6.5Zm1.75-.25a.25.25 0 0 0-.25.25v6.5c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-6.5a.25.25 0 0 0-.25-.25h-6.5Z"/></svg>
-        <svg class="octicon icon-check" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>
-        <span class="btn-label">Copy All</span>
-      </button>
-    </div>
-    <div class="box-body">
-      <pre class="code-block" id="clean-nodes" hidden></pre>
-      <div class="empty-state" id="clean-empty">No clean IPs defined yet.</div>
-    </div>
-    <div class="box-footer">
-      <button class="link-btn" id="btn-define-ips" type="button" data-open-modal="modal-clean-ips">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/></svg>
-        Define Custom Clean IPs
-      </button>
-    </div>
-  </section>
-
-</main>
-
-<footer class="app-footer">
-  <span>&copy; REvil, Freedom to Dream</span>
-</footer>
-
-<div class="toast-region" id="toast-region" aria-live="polite"></div>
-
-<div class="modal-wrap" id="modal-hiddify" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-hiddify-title">
-    <div class="modal-header">
-      <h2 class="modal-title" id="modal-hiddify-title">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>
-        Important Note for Hiddify Users
-      </h2>
-      <button class="modal-close" type="button" data-close-modal aria-label="Close">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p>For the configuration to work correctly, you need to change the <strong>Remote DNS</strong> setting in the Hiddify app.</p>
-      <div class="dns-box">
-        <div class="dns-row">
-          <span class="dns-label">From</span>
-          <code class="code-inline">udp://1.1.1.1</code>
-        </div>
-        <div class="dns-row">
-          <span class="dns-label">To</span>
-          <code class="code-inline">https://8.8.8.8/dns-query</code>
+        <div class="ip-info-section">
+          <div class="ip-info-header">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"
+              />
+            </svg>
+            <h3>Your Connection</h3>
+          </div>
+          <div class="ip-info-content">
+            <div class="ip-info-item">
+              <span class="label">Your IP</span
+              ><span class="value" id="client-ip"
+                ><span class="skeleton" style="width: 110px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">Location</span
+              ><span class="value" id="client-location"
+                ><span class="skeleton" style="width: 90px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">ISP Provider</span
+              ><span class="value" id="client-isp"
+                ><span class="skeleton" style="width: 130px"></span
+              ></span>
+            </div>
+            <div class="ip-info-item">
+              <span class="label">Risk Score</span
+              ><span class="value" id="client-proxy"
+                ><span class="skeleton" style="width: 100px"></span
+              ></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn" type="button" data-close-modal>Cancel</button>
-      <a class="btn btn-primary" id="btn-continue-hiddify" href="{{URL_HIDDIFY}}">Continue to Hiddify</a>
+
+    <div class="config-card">
+      <div class="config-title">
+        <span>Xray Core Clients</span>
+        <button class="button copy-buttons" onclick="copyToClipboard(this, '{{CONFIG_DREAM}}')">
+          <svg
+            class="copy-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy
+        </button>
+      </div>
+      <div class="config-content"><pre id="xray-config">{{CONFIG_DREAM}}</pre></div>
+      <div class="client-buttons">
+        <a href="{{URL_HIDDIFY}}" id="hiddify-import-btn" class="button client-btn">
+          <span class="client-icon"
+            ><svg viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg
+          ></span>
+          <span class="button-text">Import to Hiddify</span>
+        </a>
+        <a href="{{URL_V2RAYNG}}" class="button client-btn">
+          <span class="client-icon"
+            ><svg viewBox="0 0 24 24">
+              <path d="M12 2L4 5v6c0 5.5 3.5 10.7 8 12.3 4.5-1.6 8-6.8 8-12.3V5l-8-3z" /></svg
+          ></span>
+          <span class="button-text">Import to V2rayNG</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="config-title">
+        <span>Sing-Box Core Clients</span>
+        <button class="button copy-buttons" onclick="copyToClipboard(this, '{{CONFIG_FREEDOM}}')">
+          <svg
+            class="copy-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy
+        </button>
+      </div>
+      <div class="config-content"><pre id="singbox-config">{{CONFIG_FREEDOM}}</pre></div>
+      <div class="client-buttons">
+        <a href="{{URL_CLASH}}" class="button client-btn">
+          <span class="client-icon"
+            ><svg viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+              /></svg
+          ></span>
+          <span class="button-text">Import to Clash Meta</span>
+        </a>
+        <a href="{{URL_EXCLAVE}}" class="button client-btn">
+          <span class="client-icon"
+            ><svg viewBox="0 0 24 24">
+              <path
+                d="M20,8h-3V6c0-1.1-0.9-2-2-2H9C7.9,4,7,4.9,7,6v2H4C2.9,8,2,8.9,2,10v9c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2v-9 C22,8.9,21.1,8,20,8z M9,6h6v2H9V6z M20,19H4v-2h16V19z M20,15H4v-5h3v1c0,0.55,0.45,1,1,1h1.5c0.28,0,0.5-0.22,0.5-0.5v-0.5h4v0.5 c0,0.28,0.22,0.5,0.5,0.5H16c0.55,0,1-0.45,1-1v-1h3V15z"
+              />
+              <circle cx="8.5" cy="13.5" r="1" />
+              <circle cx="15.5" cy="13.5" r="1" />
+              <path d="M12,15.5c-0.55,0-1-0.45-1-1h2C13,15.05,12.55,15.5,12,15.5z" /></svg
+          ></span>
+          <span class="button-text">Import to Exclave</span>
+        </a>
+      </div>
+    </div>
+
+    <div id="custom-config-card" class="config-card" style="display: none;">
+      <div class="config-title">
+        <span>Custom Clean IP Nodes</span>
+        <button id="btn-copy-custom" class="button copy-buttons">
+          <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy All
+        </button>
+      </div>
+      <div class="config-content">
+        <pre id="custom-configs-pre"></pre>
+      </div>
+    </div>
+
+    <span id="open-custom-ips" class="custom-routing-trigger">➔ Define Custom Clean IPs</span>
+
+    <div class="footer">
+        <p>© <span id="current-year"></span> <b>REvil</b>, Freedom to Dream</p>
+      </div>
+    </div>
+
+  <div id="hiddify-dns-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content">
+      <h3 class="modal-title">Important Note for Hiddify Users</h3>
+      <p class="modal-text">
+        For the configuration to work correctly, you need to change the
+        <strong>Remote DNS</strong> setting in the Hiddify app.
+      </p>
+      <div class="modal-instruction">
+        Change from: <code>udp://1.1.1.1</code><br />
+        To: <code>https://8.8.8.8/dns-query</code>
+      </div>
+      <button id="hiddify-modal-continue" class="button client-btn">Continue to Hiddify</button>
     </div>
   </div>
-</div>
 
-<div class="modal-wrap" id="modal-clean-ips" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-clean-title">
-    <div class="modal-header">
-      <h2 class="modal-title" id="modal-clean-title">Custom Clean IPs</h2>
-      <button class="modal-close" type="button" data-close-modal aria-label="Close">
-        <svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p class="modal-desc">Enter your clean Cloudflare IPs or Domains (one per line) to dynamically inject them into your configs.</p>
-      <textarea class="form-control" id="clean-ips-input" rows="8" placeholder="104.16.0.1&#10;cdn.example.com" spellcheck="false"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" type="button" data-close-modal>Cancel</button>
-      <button class="btn btn-primary" type="button" id="btn-save-ips">Save &amp; Generate</button>
+  <div id="custom-ips-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content">
+      <h3 class="modal-title">Custom Clean IPs</h3>
+      <p class="modal-text">
+        Enter your clean Cloudflare IPs or Domains (one per line) to dynamically inject them into your configs.
+      </p>
+      <textarea id="custom-ips-input" class="modal-textarea" placeholder="e.g.&#10;104.20.20.20&#10;clean-cf.yourdomain.com:8443"></textarea>
+      <div class="modal-btn-group">
+        <button id="custom-ips-save" class="button client-btn">Save & Generate</button>
+        <button id="custom-ips-cancel" class="button client-btn modal-btn-secondary">Cancel</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-(function () {
-  var CHECK_ICON = '<svg class="octicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>';
-  var STORAGE_KEY = 'vless.clean_ips';
+    <script>
+      function copyToClipboard(button, text) {
+        const originalHTML = button.innerHTML;
 
-  function $(selector, ctx) {
-    return (ctx || document).querySelector(selector);
-  }
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            button.innerHTML = `
+          <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copied!
+        `;
+            button.classList.add("copied");
+            button.disabled = true;
 
-  function $all(selector, ctx) {
-    return Array.prototype.slice.call((ctx || document).querySelectorAll(selector));
-  }
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.classList.remove("copied");
+              button.disabled = false;
+            }, 1200);
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+            const originalHTMLError = button.innerHTML;
 
-  var toastRegion = $('#toast-region');
+            button.innerHTML = `
+          <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Error
+        `;
+            button.classList.add("error");
+            button.disabled = true;
 
-  function toast(message) {
-    var el = document.createElement('div');
-    el.className = 'toast';
-    el.innerHTML = CHECK_ICON + '<span></span>';
-    el.lastElementChild.textContent = message;
-    toastRegion.appendChild(el);
-    window.setTimeout(function () {
-      el.classList.add('toast-out');
-      window.setTimeout(function () {
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }, 200);
-    }, 2400);
-  }
+            setTimeout(() => {
+              button.innerHTML = originalHTMLError;
+              button.classList.remove("error");
+              button.disabled = false;
+            }, 1500);
+          });
+      }
+      
+      function updateIpApiIoDisplay(geo, prefix, originalHost) {
+        const hostElement = document.getElementById(`${prefix}-host`);
+        if (hostElement) hostElement.textContent = originalHost || "N/A";
+        const elements = {
+          ip: document.getElementById(`${prefix}-ip`),
+          location: document.getElementById(`${prefix}-location`),
+          isp: document.getElementById(`${prefix}-isp`),
+        };
+        if (!geo || geo.error) {
+          const errorMessage = geo ? geo.reason : "N/A";
+          Object.values(elements).forEach((el) => {
+            if (el) el.innerHTML = errorMessage;
+          });
+          if (elements.ip) elements.ip.innerHTML = "N/A";
+          return;
+        }
+        if (elements.ip) elements.ip.textContent = geo.ip || "N/A";
+        if (elements.location) {
+          const city = geo.city || "";
+          const countryName = geo.country_name || "";
+          const countryCode = geo.country_code ? geo.country_code.toLowerCase() : "";
+          let flagElementHtml = countryCode
+            ? `<img src="https://flagcdn.com/w20/${countryCode}.png" srcset="https://flagcdn.com/w40/${countryCode}.png 2x" alt="${geo.country_code}" class="country-flag"> `
+            : "";
+          let textPart = [city, countryName].filter(Boolean).join(", ");
+          elements.location.innerHTML =
+            flagElementHtml || textPart ? `${flagElementHtml}${textPart}`.trim() : "N/A";
+        }
+        if (elements.isp)
+          elements.isp.textContent = geo.isp || geo.organization || geo.org || "N/A";
+      }
 
-  function copyText(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text).then(function () {
-        return true;
-      }).catch(function () {
-        return legacyCopy(text);
+      async function fetchIpApiIoInfo(ip) {
+        try {
+          const response = await fetch(`https://ipapi.co/${ip}/json/`);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          return await response.json();
+        } catch (error) {
+          console.error("IP API Error (ipapi.co):", error);
+          return null;
+        }
+      }
+
+      function updateClientDisplay(data) {
+        const prefix = "client";
+        const elements = {
+          ip: document.getElementById(`${prefix}-ip`),
+          location: document.getElementById(`${prefix}-location`),
+          isp: document.getElementById(`${prefix}-isp`),
+          proxy: document.getElementById(`${prefix}-proxy`),
+        };
+
+        if (elements.ip) elements.ip.textContent = data.ip || "N/A";
+        if (elements.isp) elements.isp.textContent = data.isp || "N/A";
+
+        if (elements.location) {
+          const countryCode = data.country ? data.country.toLowerCase() : "";
+          const flagElementHtml = (countryCode && countryCode !== "n/a")
+            ? `<img src="https://flagcdn.com/w20/${countryCode}.png" srcset="https://flagcdn.com/w40/${countryCode}.png 2x" alt="${data.country}" class="country-flag"> `
+            : "";
+          const textPart = [data.city, data.country].filter(Boolean).join(", ");
+          elements.location.innerHTML =
+            flagElementHtml || textPart ? `${flagElementHtml}${textPart}`.trim() : "N/A";
+        }
+
+        if (elements.proxy) {
+          const score = data.threatScore;
+          const risk = data.risk;
+          let badgeClass = "badge-neutral";
+          
+          switch (risk.toLowerCase()) {
+            case "low":
+              badgeClass = "badge-yes";
+              break;
+            case "medium":
+              badgeClass = "badge-warning";
+              break;
+            case "high":
+              badgeClass = "badge-no";
+              break;
+          }
+          elements.proxy.innerHTML = `<span class="badge ${badgeClass}">${score} - ${risk} Risk</span>`;
+        }
+      }
+
+      function showError(prefix, message = "Could not load data", originalHostForProxy = null) {
+        const errorMessage = "N/A";
+        const elements =
+          prefix === "proxy"
+            ? ["host", "ip", "location", "isp"]
+            : ["ip", "location", "isp", "proxy"];
+
+        elements.forEach((key) => {
+          const el = document.getElementById(`${prefix}-${key}`);
+          if (!el) return;
+          if (key === "host" && prefix === "proxy")
+            el.textContent = originalHostForProxy || errorMessage;
+          else if (key === "proxy" && prefix === "client")
+            el.innerHTML = `<span class="badge badge-neutral">N/A</span>`;
+          else el.innerHTML = errorMessage;
+        });
+        console.warn(`${prefix} data loading failed: ${message}`);
+      }
+
+      async function loadNetworkInfo() {
+        try {
+          const proxyIpWithPort = document.body.getAttribute("data-proxy-ip") || "N/A";
+          const proxyDomainOrIp = proxyIpWithPort.split(":")[0];
+          const proxyHostEl = document.getElementById("proxy-host");
+          if (proxyHostEl) proxyHostEl.textContent = proxyIpWithPort;
+
+          if (proxyDomainOrIp && proxyDomainOrIp !== "N/A") {
+            let resolvedProxyIp = proxyDomainOrIp;
+            if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(proxyDomainOrIp)) {
+              try {
+                const dnsRes = await fetch(`/resolve-domain?domain=${encodeURIComponent(proxyDomainOrIp)}`);
+                if (dnsRes.ok) {
+                  const dnsData = await dnsRes.json();
+                  if (dnsData.ip) resolvedProxyIp = dnsData.ip;
+                }
+              } catch (e) {
+                console.error("DNS resolution for proxy failed:", e);
+              }
+            }
+            const proxyGeoData = await fetchIpApiIoInfo(resolvedProxyIp);
+            updateIpApiIoDisplay(proxyGeoData, "proxy", proxyIpWithPort);
+          } else {
+            showError("proxy", "Proxy Host not available", proxyIpWithPort);
+          }
+
+          try {
+            const clientRes = await fetch("/my-connection");
+            if (clientRes.ok) {
+              const clientData = await clientRes.json();
+              updateClientDisplay(clientData);
+            } else {
+              throw new Error("Failed to fetch connection details");
+            }
+          } catch (e) {
+            console.error("Error loading client info:", e);
+            showError("client", "Could not load client IP details.");
+          }
+
+        } catch (error) {
+          console.error("Overall network info loading failed:", error);
+          showError(
+            "proxy",
+            `Error: ${error.message}`,
+            document.body.getAttribute("data-proxy-ip") || "N/A",
+          );
+          showError("client", `Error: ${error.message}`);
+        }
+      }
+
+      function rebuildVlessLink(baseLink, newHost, newPort, newName) {
+        const match = baseLink.match(/^vless:\/\/([^@]+)@([^:?#]+):(\d+)(\?[^#]*)?/);
+        if (!match) throw new Error("Could not parse base VLESS link");
+        const [, userID, , , queryString = ""] = match;
+        return `vless://${userID}@${newHost}:${newPort}${queryString}#${encodeURIComponent(newName)}`;
+      }
+
+      function processCustomCleanIPs(savedIps) {
+        const card = document.getElementById("custom-config-card");
+        const pre = document.getElementById("custom-configs-pre");
+        if (!card || !pre) return;
+
+        const lines = savedIps.split('\n').map(line => line.trim()).filter(line => line !== "");
+        const xrayBase = document.getElementById("xray-config")?.textContent || "";
+        const sbBase = document.getElementById("singbox-config")?.textContent || "";
+
+        let customConfigs = [];
+
+        lines.forEach((ip, index) => {
+          let host = ip;
+          let port = "443";
+        
+          if (ip.includes(':') && !ip.startsWith('[')) {
+            const parts = ip.split(':');
+            host = parts[0];
+            port = parts[1];
+          } else if (ip.startsWith('[') && ip.includes(']:')) {
+            const parts = ip.split(']:');
+            host = parts[0] + ']';
+            port = parts[1];
+          }
+        
+          try {
+            const xrFinal = rebuildVlessLink(xrayBase, host, port, `Clean-${index + 1}-Xray`);
+            customConfigs.push(xrFinal);
+        
+            const sbFinal = rebuildVlessLink(sbBase, host, port, `Clean-${index + 1}-Singbox`);
+            customConfigs.push(sbFinal);
+          } catch (e) {
+            console.error("Link generation failed for custom route:", e);
+          }
+        });
+
+        if (customConfigs.length > 0) {
+          const outputText = customConfigs.join('\n');
+          pre.textContent = outputText;
+          card.style.display = 'block';
+          document.getElementById('btn-copy-custom').onclick = function() { copyToClipboard(this, outputText); };
+        } else {
+          card.style.display = 'none';
+        }
+      }
+
+      document.getElementById("refresh-ip-info")?.addEventListener("click", function () {
+        const button = this;
+        const icon = button.querySelector(".refresh-icon");
+        button.disabled = true;
+        if (icon) icon.style.animation = "spin 1s linear infinite";
+
+        const resetToSkeleton = (prefix) => {
+          const elementsToReset = ["ip", "location", "isp"];
+          if (prefix === "proxy") elementsToReset.push("host");
+          if (prefix === "client") elementsToReset.push("proxy");
+          elementsToReset.forEach((key) => {
+            const element = document.getElementById(`${prefix}-${key}`);
+            if (element) element.innerHTML = `<span class="skeleton" style="width: 120px;"></span>`;
+          });
+        };
+
+        resetToSkeleton("proxy");
+        resetToSkeleton("client");
+        loadNetworkInfo().finally(() =>
+          setTimeout(() => {
+            button.disabled = false;
+            if (icon) icon.style.animation = "";
+          }, 1000),
+        );
       });
-    }
-    return Promise.resolve(legacyCopy(text));
-  }
 
-  function legacyCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    var ok = false;
-    try {
-      ok = document.execCommand('copy');
-    } catch (e) {
-      ok = false;
-    }
-    document.body.removeChild(ta);
-    return ok;
-  }
+      const style = document.createElement("style");
+      style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+      document.head.appendChild(style);
 
-  function flashCopied(btn) {
-    var label = btn.querySelector('.btn-label');
-    if (label && !btn.dataset.origLabel) {
-      btn.dataset.origLabel = label.textContent;
-    }
-    btn.classList.add('is-copied');
-    if (label) label.textContent = 'Copied';
-    window.clearTimeout(btn._copyTimer);
-    btn._copyTimer = window.setTimeout(function () {
-      btn.classList.remove('is-copied');
-      if (label && btn.dataset.origLabel) label.textContent = btn.dataset.origLabel;
-    }, 2000);
-  }
+      document.addEventListener("DOMContentLoaded", () => {
+        const yearEl = document.getElementById("current-year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+      
+        loadNetworkInfo();
 
-  function bindCopy(btn, getText, message) {
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      var text = String(getText() || '').trim();
-      if (!text) return;
-      copyText(text).then(function (ok) {
-        if (ok) {
-          flashCopied(btn);
-          toast(message);
+        const savedIps = localStorage.getItem("custom_clean_ips");
+        if (savedIps) {
+          document.getElementById("custom-ips-input").value = savedIps;
+          processCustomCleanIPs(savedIps);
+        }
+
+        const hiddifyBtn = document.getElementById("hiddify-import-btn");
+        const modal = document.getElementById("hiddify-dns-modal");
+        const continueBtn = document.getElementById("hiddify-modal-continue");
+
+        if (hiddifyBtn && modal && continueBtn) {
+          hiddifyBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add("visible"), 10);
+          });
+
+          continueBtn.addEventListener("click", function () {
+            modal.classList.remove("visible");
+            setTimeout(() => {
+              modal.style.display = "none";
+              window.location.href = hiddifyBtn.href;
+            }, 300);
+          });
+
+          modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+              modal.classList.remove("visible");
+              setTimeout(() => (modal.style.display = "none"), 300);
+            }
+          });
+        }
+
+        const customTrigger = document.getElementById("open-custom-ips");
+        const customModal = document.getElementById("custom-ips-modal");
+        const customSave = document.getElementById("custom-ips-save");
+        const customCancel = document.getElementById("custom-ips-cancel");
+        const customInput = document.getElementById("custom-ips-input");
+
+        if (customTrigger && customModal && customSave && customCancel) {
+          customTrigger.addEventListener("click", () => {
+            customModal.style.display = "flex";
+            setTimeout(() => customModal.classList.add("visible"), 10);
+          });
+
+          const closeModal = () => {
+            customModal.classList.remove("visible");
+            setTimeout(() => { customModal.style.display = "none"; }, 300);
+          };
+
+          customCancel.addEventListener("click", closeModal);
+          customModal.addEventListener("click", (e) => { if (e.target === customModal) closeModal(); });
+
+          customSave.addEventListener("click", () => {
+            const value = customInput.value;
+            localStorage.setItem("custom_clean_ips", value);
+            processCustomCleanIPs(value);
+            closeModal();
+            
+            if (value.trim().length > 0) {
+              document.getElementById("custom-config-card").scrollIntoView({ behavior: 'smooth' });
+            }
+          });
         }
       });
-    });
-  }
-
-  function openModal(id) {
-    var wrap = document.getElementById(id);
-    if (!wrap) return;
-    wrap.hidden = false;
-    document.body.classList.add('modal-open');
-    var closeBtn = wrap.querySelector('.modal-close');
-    if (closeBtn) closeBtn.focus();
-  }
-
-  function closeWrap(wrap) {
-    if (!wrap) return;
-    wrap.hidden = true;
-    if (!document.querySelector('.modal-wrap:not([hidden])')) {
-      document.body.classList.remove('modal-open');
-    }
-  }
-
-  $all('[data-open-modal]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      openModal(btn.getAttribute('data-open-modal'));
-    });
-  });
-
-  $all('[data-close-modal]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      closeWrap(btn.closest('.modal-wrap'));
-    });
-  });
-
-  $all('.modal-wrap').forEach(function (wrap) {
-    wrap.addEventListener('mousedown', function (e) {
-      if (e.target === wrap) closeWrap(wrap);
-    });
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      $all('.modal-wrap:not([hidden])').forEach(closeWrap);
-    }
-  });
-
-  var continueHiddify = $('#btn-continue-hiddify');
-  if (continueHiddify) {
-    continueHiddify.addEventListener('click', function () {
-      closeWrap($('#modal-hiddify'));
-    });
-  }
-
-  var importHiddify = $('#btn-import-hiddify');
-  if (importHiddify) {
-    importHiddify.addEventListener('click', function () {
-      openModal('modal-hiddify');
-    });
-  }
-
-  function fetchJSON(url, options, timeout) {
-    var controller = new AbortController();
-    var timer = window.setTimeout(function () {
-      controller.abort();
-    }, timeout || 8000);
-    var opts = Object.assign({}, options || {}, { signal: controller.signal });
-    return fetch(url, opts).then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    }).finally(function () {
-      window.clearTimeout(timer);
-    });
-  }
-
-  function resolveHostIp(host) {
-    if (!host) return Promise.resolve(null);
-    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return Promise.resolve(host);
-    return fetchJSON('https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(host) + '&type=A', {
-      headers: { accept: 'application/dns-json' }
-    }).then(function (data) {
-      var answers = (data && data.Answer) || [];
-      for (var i = 0; i < answers.length; i++) {
-        if (answers[i].type === 1) return answers[i].data;
-      }
-      return null;
-    }).catch(function () {
-      return null;
-    });
-  }
-
-  function lookupIp(ip) {
-    return fetchJSON('https://ipwho.is/' + encodeURIComponent(ip)).then(function (data) {
-      return data && data.success !== false ? data : null;
-    }).catch(function () {
-      return null;
-    });
-  }
-
-  function fallbackClientInfo() {
-    return fetchJSON('https://ipapi.co/json/').then(function (data) {
-      if (!data || data.error) return null;
-      return {
-        ip: data.ip,
-        city: data.city,
-        country: data.country_name,
-        connection: { org: data.org, isp: data.org },
-        type: ''
-      };
-    }).catch(function () {
-      return null;
-    });
-  }
-
-  function lookupClient() {
-    return fetchJSON('https://ipwho.is/').then(function (data) {
-      if (data && data.success !== false && data.ip) return data;
-      return fallbackClientInfo();
-    }).catch(function () {
-      return fallbackClientInfo();
-    });
-  }
-
-  function fmtLocation(info) {
-    if (!info) return '';
-    return [info.city, info.country].filter(Boolean).join(', ');
-  }
-
-  function fmtIsp(info) {
-    if (!info) return '';
-    var conn = info.connection || {};
-    return conn.isp || conn.org || info.isp || info.org || '';
-  }
-
-  function assessRisk(info) {
-    var conn = info.connection || {};
-    var haystack = ((conn.org || '') + ' ' + (conn.isp || '') + ' ' + (info.isp || '')).toLowerCase();
-    var type = String(info.type || '').toLowerCase();
-    var hosting = /(hosting|datacenter|data center|server|cloud|hetzner|ovh|digitalocean|vultr|linode|contabo|amazon|google|microsoft)/;
-    var mobile = /(mobile|cellular|mci|hamrah|irancell|rightel|mtn|gsm|lte)/;
-    if (type === 'hosting' || hosting.test(haystack)) {
-      return { text: 'High Risk', cls: 'danger' };
-    }
-    if (type === 'mobile' || mobile.test(haystack)) {
-      return { text: 'Low Risk', cls: 'success' };
-    }
-    return { text: 'Medium Risk', cls: 'warning' };
-  }
-
-  function setVal(id, text) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    if (text) {
-      el.textContent = text;
-      el.classList.remove('is-empty');
-    } else {
-      el.textContent = '\u2014';
-      el.classList.add('is-empty');
-    }
-  }
-
-  function setSkeleton(id, size) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('is-empty');
-    el.innerHTML = '<span class="skeleton ' + size + '"></span>';
-  }
-
-  function setBadge(id, text, cls) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = '';
-    var badge = document.createElement('span');
-    badge.className = 'label label--' + cls;
-    badge.textContent = text;
-    el.appendChild(badge);
-  }
-
-  var loadingNetwork = false;
-
-  function loadNetworkInfo() {
-    if (loadingNetwork) return;
-    loadingNetwork = true;
-    var btn = $('#btn-refresh');
-    var icon = btn ? btn.querySelector('.octicon') : null;
-    if (btn) btn.disabled = true;
-    if (icon) icon.classList.add('icon-spin');
-
-    var host = window.location.hostname || '';
-    setVal('proxy-host', host);
-    setSkeleton('proxy-ip', 'sk-md');
-    setSkeleton('proxy-location', 'sk-lg');
-    setSkeleton('proxy-isp', 'sk-lg');
-    setSkeleton('client-ip', 'sk-md');
-    setSkeleton('client-location', 'sk-lg');
-    setSkeleton('client-isp', 'sk-lg');
-    setSkeleton('client-risk', 'sk-sm');
-
-    resolveHostIp(host).then(function (ip) {
-      setVal('proxy-ip', ip);
-      var proxyLookup = ip ? lookupIp(ip) : Promise.resolve(null);
-      return Promise.all([proxyLookup, lookupClient()]);
-    }).then(function (results) {
-      var proxyInfo = results[0];
-      var clientInfo = results[1];
-      setVal('proxy-location', fmtLocation(proxyInfo));
-      setVal('proxy-isp', fmtIsp(proxyInfo));
-      if (clientInfo) {
-        setVal('client-ip', clientInfo.ip);
-        setVal('client-location', fmtLocation(clientInfo));
-        setVal('client-isp', fmtIsp(clientInfo));
-        var risk = assessRisk(clientInfo);
-        setBadge('client-risk', risk.text, risk.cls);
-      } else {
-        setVal('client-ip', '');
-        setVal('client-location', '');
-        setVal('client-isp', '');
-        setBadge('client-risk', 'Unknown', 'muted');
-      }
-    }).catch(function () {
-      ['proxy-ip', 'proxy-location', 'proxy-isp', 'client-ip', 'client-location', 'client-isp'].forEach(function (id) {
-        setVal(id, '');
-      });
-      setBadge('client-risk', 'Unknown', 'muted');
-    }).then(function () {
-      if (btn) btn.disabled = false;
-      if (icon) icon.classList.remove('icon-spin');
-      loadingNetwork = false;
-    });
-  }
-
-  var refreshBtn = $('#btn-refresh');
-  if (refreshBtn) {
-    refreshBtn.addEventListener('click', loadNetworkInfo);
-  }
-
-  var cleanState = { list: [] };
-
-  function parseCleanIps(raw) {
-    var lines = String(raw || '').split(/\r?\n/);
-    var out = [];
-    for (var i = 0; i < lines.length; i++) {
-      var value = lines[i].trim();
-      if (value && out.indexOf(value) === -1) out.push(value);
-    }
-    return out;
-  }
-
-  function storageGet() {
-    try {
-      return window.localStorage.getItem(STORAGE_KEY) || '';
-    } catch (e) {
-      return '';
-    }
-  }
-
-  function storageSet(value) {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, value);
-    } catch (e) {
-      return;
-    }
-  }
-
-  function b64encode(str) {
-    var bytes = new TextEncoder().encode(str);
-    var bin = '';
-    for (var i = 0; i < bytes.length; i++) {
-      bin += String.fromCharCode(bytes[i]);
-    }
-    return btoa(bin);
-  }
-
-  function b64decode(encoded) {
-    var bin = atob(encoded);
-    var bytes = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    return new TextDecoder().decode(bytes);
-  }
-
-  function readUrlIps() {
-    try {
-      var param = new URLSearchParams(window.location.search).get('clean_ips');
-      if (!param) return null;
-      return b64decode(param);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function renderCleanNodes() {
-    var pre = $('#clean-nodes');
-    var empty = $('#clean-empty');
-    var btn = $('#btn-copy-clean');
-    if (cleanState.list.length) {
-      pre.textContent = cleanState.list.join('\n');
-      pre.hidden = false;
-      empty.hidden = true;
-      if (btn) btn.disabled = false;
-    } else {
-      pre.textContent = '';
-      pre.hidden = true;
-      empty.hidden = false;
-      if (btn) btn.disabled = true;
-    }
-  }
-
-  var ipsInput = $('#clean-ips-input');
-  var initialIps = readUrlIps();
-  if (initialIps === null) initialIps = storageGet();
-  if (ipsInput) ipsInput.value = initialIps;
-  cleanState.list = parseCleanIps(initialIps);
-  renderCleanNodes();
-
-  var saveBtn = $('#btn-save-ips');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', function () {
-      var raw = ipsInput ? ipsInput.value : '';
-      var joined = parseCleanIps(raw).join('\n');
-      storageSet(joined);
-      var url = new URL(window.location.href);
-      if (joined) {
-        url.searchParams.set('clean_ips', b64encode(joined));
-      } else {
-        url.searchParams.delete('clean_ips');
-      }
-      window.location.href = url.toString();
-    });
-  }
-
-  bindCopy($('#btn-copy-xray'), function () {
-    return $('#config-dream').textContent;
-  }, 'Xray configuration copied');
-
-  bindCopy($('#btn-copy-singbox'), function () {
-    return $('#config-freedom').textContent;
-  }, 'Sing-Box configuration copied');
-
-  bindCopy($('#btn-copy-clean'), function () {
-    return cleanState.list.join('\n');
-  }, 'Clean IP nodes copied');
-
-  loadNetworkInfo();
-})();
-</script>
-</body>
+    </script>
+  </body>
 </html>
