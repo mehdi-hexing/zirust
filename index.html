@@ -9,30 +9,30 @@
   <link rel="icon" href="https://pub-b3ab4c8172fb44e29854df3435aa223d.r2.dev/raven.png" type="image/png">
   <style>
     :root {
-      --canvas: #0d1117;
-      --canvas-subtle: #161b22;
-      --canvas-inset: #010409;
-      --overlay: #1f242d;
-      --border-default: #30363d;
-      --border-muted: #21262d;
-      --fg-default: #c9d1d9;
-      --fg-muted: #8b949e;
-      --fg-subtle: #6e7681;
-      --accent: #2f81f7;
+      --fgColor-default: #c9d1d9;
+      --fgColor-muted: #8b949e;
+      --fgColor-subtle: #6e7681;
+      --bgColor-default: #0d1117;
+      --bgColor-muted: #161b22;
+      --bgColor-inset: #010409;
+      --bgColor-overlay: #1f242d;
+      --borderColor-default: #30363d;
+      --borderColor-muted: #21262d;
+      --accent-base: #2f81f7;
       --accent-emphasis: #1f6feb;
       --accent-muted: rgba(47, 129, 247, 0.16);
-      --selection: rgba(47, 129, 247, 0.28);
-      --focus: #58a6ff;
-      --success: #3fb950;
-      --warning: #d29922;
-      --danger: #f85149;
+      --selection-bg: rgba(47, 129, 247, 0.28);
+      --focus-ring: #58a6ff;
+      --status-success: #3fb950;
+      --status-warning: #d29922;
+      --status-danger: #f85149;
       --radius-sm: 6px;
       --radius-md: 8px;
-      --radius-lg: 12px;
+      --radius-lg: 10px;
       --shadow-overlay: 0 8px 24px rgba(1, 4, 9, 0.28);
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
       --font-mono: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-      --transition: 120ms ease;
+      --transition: 100ms ease;
     }
 
     * {
@@ -47,9 +47,9 @@
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 16px;
-      background: var(--canvas);
-      color: var(--fg-default);
+      padding: 12px;
+      background: var(--bgColor-default);
+      color: var(--fgColor-default);
       font-family: var(--font-sans);
       font-size: 14px;
       line-height: 1.5;
@@ -60,12 +60,12 @@
 
     body::selection,
     ::selection {
-      background: var(--selection);
-      color: var(--fg-default);
+      background: var(--selection-bg);
+      color: var(--fgColor-default);
     }
 
     a {
-      color: var(--accent);
+      color: var(--accent-base);
       text-decoration: none;
     }
 
@@ -78,61 +78,63 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
 
     .header {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 4px 0 8px;
-      border-bottom: 1px solid var(--border-default);
+      gap: 2px;
+      padding: 0 0 12px;
+      border-bottom: 1px solid var(--borderColor-muted);
+      margin-bottom: 4px;
     }
 
     .header h1 {
       margin: 0;
-      font-size: clamp(1.25rem, 2.2vw, 1.625rem);
-      line-height: 1.25;
-      font-weight: 600;
-      color: var(--fg-default);
+      font-size: 20px;
+      line-height: 1.3;
+      font-weight: 500;
+      color: var(--fgColor-default);
       letter-spacing: -0.01em;
     }
 
     .header p {
       margin: 0;
-      color: var(--fg-muted);
+      color: var(--fgColor-muted);
       font-size: 13px;
       line-height: 1.5;
     }
 
     .config-card {
-      background: var(--canvas-subtle);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin: 0;
+      background: var(--bgColor-muted);
+      border: 1px solid var(--borderColor-muted);
+      border-radius: var(--radius-md);
+      padding: 12px;
     }
 
     .config-card:hover {
-      border-color: var(--border-default);
+      border-color: var(--borderColor-default);
+      background: #1c2128;
     }
 
     .config-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-muted);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--fg-default);
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--borderColor-muted);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fgColor-default);
       letter-spacing: 0;
     }
 
     .config-title > span {
       min-width: 0;
+      flex: 1;
     }
 
     .button,
@@ -143,15 +145,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 32px;
-      padding: 0 12px;
+      gap: 6px;
+      min-height: 28px;
+      padding: 0 10px;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--border-default);
-      background: var(--overlay);
-      color: var(--fg-default);
+      border: 1px solid var(--borderColor-default);
+      background: var(--bgColor-overlay);
+      color: var(--fgColor-default);
       font: inherit;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       line-height: 1;
       cursor: pointer;
@@ -167,9 +169,9 @@
     .refresh-btn:hover,
     .copy-buttons:hover,
     .client-btn:hover {
-      background: #30363d;
-      border-color: #8b949e;
-      color: var(--fg-default);
+      background: #262c36;
+      border-color: var(--borderColor-default);
+      color: var(--fgColor-default);
       text-decoration: none;
     }
 
@@ -177,8 +179,8 @@
     .refresh-btn:active,
     .copy-buttons:active,
     .client-btn:active {
-      background: #262c36;
-      border-color: var(--border-default);
+      background: #1f242d;
+      border-color: var(--borderColor-muted);
     }
 
     .button:focus-visible,
@@ -186,7 +188,7 @@
     .copy-buttons:focus-visible,
     .client-btn:focus-visible,
     .modal-textarea:focus-visible {
-      outline: 2px solid var(--focus);
+      outline: 2px solid var(--focus-ring);
       outline-offset: 2px;
     }
 
@@ -199,9 +201,9 @@
 
     .refresh-btn,
     .copy-buttons {
-      font-size: 12px;
-      padding-inline: 10px;
-      background: #21262d;
+      padding-inline: 8px;
+      background: #1f242d;
+      border-color: var(--borderColor-muted);
     }
 
     .refresh-icon,
@@ -213,11 +215,11 @@
     }
 
     .config-content {
-      background: var(--canvas-inset);
-      border: 1px solid var(--border-muted);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      margin-bottom: 14px;
+      background: var(--bgColor-inset);
+      border: 1px solid var(--borderColor-muted);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      margin-bottom: 10px;
     }
 
     .config-content pre {
@@ -225,28 +227,29 @@
       overflow-x: auto;
       white-space: pre-wrap;
       word-break: break-all;
-      color: var(--fg-default);
+      color: var(--fgColor-default);
       font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.55;
+      font-size: 11px;
+      line-height: 1.5;
       user-select: text;
     }
 
     .client-buttons {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 0;
+      gap: 6px;
     }
 
     .client-btn {
       width: 100%;
       align-items: center;
       justify-content: center;
-      padding-inline: 12px;
+      min-height: 32px;
+      padding-inline: 10px;
       background: #21262d;
-      color: var(--fg-default);
-      border-color: var(--border-default);
+      color: var(--fgColor-default);
+      border-color: var(--borderColor-muted);
+      font-size: 12px;
     }
 
     .client-btn .button-text {
@@ -257,21 +260,21 @@
     }
 
     .client-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      background: var(--canvas);
-      border: 1px solid var(--border-default);
-      color: var(--fg-muted);
+      background: var(--bgColor-inset);
+      border: 1px solid var(--borderColor-muted);
+      color: var(--fgColor-muted);
     }
 
     .client-icon svg {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       fill: none;
       stroke: currentColor;
       stroke-width: 1.8;
@@ -280,129 +283,130 @@
     }
 
     .button.copied {
-      background: rgba(63, 185, 80, 0.16) !important;
-      border-color: rgba(63, 185, 80, 0.38) !important;
+      background: rgba(63, 185, 80, 0.12) !important;
+      border-color: rgba(63, 185, 80, 0.32) !important;
       color: #7ee787 !important;
     }
 
     .button.error {
-      background: rgba(248, 81, 73, 0.16) !important;
-      border-color: rgba(248, 81, 73, 0.38) !important;
+      background: rgba(248, 81, 73, 0.12) !important;
+      border-color: rgba(248, 81, 73, 0.32) !important;
       color: #ff9b92 !important;
     }
 
     .ip-info-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      gap: 10px;
     }
 
     .ip-info-section {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding: 14px;
-      background: var(--canvas-inset);
-      border: 1px solid var(--border-muted);
-      border-radius: var(--radius-md);
+      gap: 8px;
+      padding: 10px;
+      background: var(--bgColor-inset);
+      border: 1px solid var(--borderColor-muted);
+      border-radius: var(--radius-sm);
       min-width: 0;
     }
 
     .ip-info-header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-muted);
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--borderColor-muted);
       min-width: 0;
     }
 
     .ip-info-header svg {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       flex: 0 0 auto;
-      stroke: var(--fg-muted);
+      stroke: var(--fgColor-muted);
     }
 
     .ip-info-header h3 {
       margin: 0;
       min-width: 0;
-      color: var(--fg-default);
-      font-size: 14px;
-      font-weight: 600;
+      color: var(--fgColor-default);
+      font-size: 12px;
+      font-weight: 500;
       letter-spacing: 0;
     }
 
     .ip-info-content {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       min-width: 0;
     }
 
     .ip-info-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       min-width: 0;
     }
 
     .ip-info-item .label {
       font-size: 11px;
-      color: var(--fg-muted);
-      letter-spacing: 0.02em;
+      color: var(--fgColor-subtle);
+      letter-spacing: 0.01em;
+      font-weight: 500;
     }
 
     .ip-info-item .value {
       min-width: 0;
-      color: var(--fg-default);
-      font-size: 13px;
-      line-height: 1.45;
+      color: var(--fgColor-default);
+      font-size: 12px;
+      line-height: 1.4;
       word-break: break-word;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       padding: 2px 8px;
-      border-radius: 999px;
+      border-radius: 12px;
       border: 1px solid transparent;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       line-height: 1.35;
       white-space: nowrap;
     }
 
     .badge-yes {
-      background: rgba(63, 185, 80, 0.14);
+      background: rgba(63, 185, 80, 0.1);
       color: #7ee787;
-      border-color: rgba(63, 185, 80, 0.28);
+      border-color: rgba(63, 185, 80, 0.24);
     }
 
     .badge-warning {
-      background: rgba(210, 153, 34, 0.14);
+      background: rgba(210, 153, 34, 0.1);
       color: #d29922;
-      border-color: rgba(210, 153, 34, 0.28);
+      border-color: rgba(210, 153, 34, 0.24);
     }
 
     .badge-no {
-      background: rgba(248, 81, 73, 0.14);
+      background: rgba(248, 81, 73, 0.1);
       color: #ff7b72;
-      border-color: rgba(248, 81, 73, 0.28);
+      border-color: rgba(248, 81, 73, 0.24);
     }
 
     .badge-neutral {
-      background: rgba(88, 166, 255, 0.14);
+      background: rgba(88, 166, 255, 0.1);
       color: #79c0ff;
-      border-color: rgba(88, 166, 255, 0.28);
+      border-color: rgba(88, 166, 255, 0.24);
     }
 
     .skeleton {
       display: block;
       width: 100%;
-      height: 14px;
-      border-radius: 999px;
+      height: 12px;
+      border-radius: 3px;
       background: linear-gradient(90deg, #21262d 25%, #30363d 37%, #21262d 63%);
       background-size: 400% 100%;
       animation: loading 1.4s ease infinite;
@@ -417,12 +421,21 @@
       }
     }
 
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .country-flag {
       display: inline-block;
-      width: 18px;
+      width: 16px;
       height: auto;
-      max-height: 14px;
-      margin-right: 6px;
+      max-height: 12px;
+      margin-right: 4px;
       vertical-align: middle;
       border-radius: 2px;
     }
@@ -431,34 +444,35 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       width: fit-content;
-      margin: 8px auto 0;
-      padding: 4px 0;
-      color: var(--fg-muted);
+      margin: 4px auto 0;
+      padding: 2px 0;
+      color: var(--fgColor-muted);
       font-size: 12px;
       line-height: 1.4;
       cursor: pointer;
-      border-bottom: 1px dashed var(--border-default);
+      border-bottom: 1px dashed var(--borderColor-default);
       transition: color var(--transition), border-color var(--transition);
     }
 
     .custom-routing-trigger:hover {
-      color: var(--fg-default);
-      border-color: var(--fg-muted);
+      color: var(--fgColor-default);
+      border-color: var(--fgColor-muted);
       text-decoration: none;
     }
 
     .footer {
-      padding: 8px 0 16px;
+      padding: 8px 0 12px;
       text-align: center;
-      color: var(--fg-muted);
-      font-size: 12px;
-      border-top: 1px solid var(--border-default);
+      color: var(--fgColor-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--borderColor-muted);
+      margin-top: 4px;
     }
 
     .footer b {
-      color: var(--fg-default);
+      color: var(--fgColor-default);
       font-weight: 600;
     }
 
@@ -468,12 +482,12 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: var(--canvas);
+      background: var(--bgColor-default);
     }
 
     ::-webkit-scrollbar-thumb {
       background: #30363d;
-      border: 3px solid var(--canvas);
+      border: 3px solid var(--bgColor-default);
       border-radius: 999px;
     }
 
@@ -483,7 +497,7 @@
 
     * {
       scrollbar-width: thin;
-      scrollbar-color: #30363d var(--canvas);
+      scrollbar-color: #30363d var(--bgColor-default);
     }
 
     .modal-overlay {
@@ -507,10 +521,10 @@
 
     .modal-content {
       width: min(100%, 480px);
-      padding: 16px;
-      background: var(--canvas-subtle);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-lg);
+      padding: 12px;
+      background: var(--bgColor-muted);
+      border: 1px solid var(--borderColor-default);
+      border-radius: var(--radius-md);
       box-shadow: var(--shadow-overlay);
       text-align: left;
       transform: scale(0.98);
@@ -522,71 +536,72 @@
     }
 
     .modal-title {
-      margin: 0 0 8px;
-      font-size: 16px;
+      margin: 0 0 6px;
+      font-size: 14px;
       line-height: 1.4;
-      font-weight: 600;
-      color: var(--fg-default);
+      font-weight: 500;
+      color: var(--fgColor-default);
     }
 
     .modal-text {
-      margin: 0 0 12px;
-      font-size: 13px;
+      margin: 0 0 10px;
+      font-size: 12px;
       line-height: 1.5;
-      color: var(--fg-default);
+      color: var(--fgColor-muted);
     }
 
     .modal-instruction {
-      margin-bottom: 14px;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-muted);
-      background: var(--canvas-inset);
-      color: var(--fg-default);
-      font-size: 13px;
-      line-height: 1.65;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--borderColor-muted);
+      background: var(--bgColor-inset);
+      color: var(--fgColor-default);
+      font-size: 12px;
+      line-height: 1.6;
       word-break: break-word;
     }
 
     .modal-instruction code {
-      padding: 2px 6px;
-      border-radius: 6px;
+      padding: 1px 4px;
+      border-radius: 3px;
       background: #161b22;
-      border: 1px solid var(--border-muted);
+      border: 1px solid var(--borderColor-muted);
       color: #79c0ff;
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .modal-textarea {
       width: 100%;
-      min-height: 120px;
-      margin-bottom: 12px;
-      padding: 10px 12px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border-default);
-      background: var(--canvas-inset);
-      color: var(--fg-default);
+      min-height: 100px;
+      margin-bottom: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--borderColor-default);
+      background: var(--bgColor-inset);
+      color: var(--fgColor-default);
       font: inherit;
       font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.55;
+      font-size: 11px;
+      line-height: 1.5;
       resize: vertical;
     }
 
     .modal-textarea::placeholder {
-      color: var(--fg-subtle);
+      color: var(--fgColor-subtle);
     }
 
     .modal-btn-group {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      gap: 6px;
     }
 
     .modal-btn-secondary {
-      background: #21262d;
-      color: var(--fg-default);
+      background: #1f242d;
+      color: var(--fgColor-default);
+      border-color: var(--borderColor-muted);
     }
 
     #hiddify-modal-continue {
@@ -610,6 +625,33 @@
       flex: 0 0 auto;
     }
 
+    .copy-btn-icon-only {
+      padding: 0 6px;
+      min-width: 28px;
+    }
+
+    [data-tooltip] {
+      position: relative;
+    }
+
+    [data-tooltip]:hover::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 6px;
+      padding: 4px 8px;
+      background: #30363d;
+      color: var(--fgColor-default);
+      font-size: 11px;
+      border-radius: 4px;
+      white-space: nowrap;
+      border: 1px solid var(--borderColor-default);
+      z-index: 10;
+      pointer-events: none;
+    }
+
     @media (max-width: 900px) {
       .ip-info-grid {
         grid-template-columns: 1fr;
@@ -618,23 +660,34 @@
 
     @media (max-width: 640px) {
       body {
-        padding: 12px;
+        padding: 10px;
       }
 
       .container {
-        gap: 12px;
+        gap: 10px;
       }
 
       .config-card {
-        padding: 14px;
+        padding: 10px;
       }
 
       .client-buttons {
         grid-template-columns: 1fr;
+        gap: 6px;
       }
 
       .modal-btn-group {
         grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .header {
+        padding: 0 0 10px;
+        margin-bottom: 2px;
+      }
+
+      .header h1 {
+        font-size: 18px;
       }
 
       .header p {
@@ -642,18 +695,32 @@
       }
 
       .footer {
-        font-size: 11px;
+        font-size: 10px;
+      }
+
+      .config-title {
+        margin-bottom: 8px;
+        padding-bottom: 8px;
       }
     }
 
     @media (max-width: 420px) {
       body {
-        padding: 10px;
+        padding: 8px;
+      }
+
+      .container {
+        gap: 8px;
+      }
+
+      .config-card {
+        padding: 8px;
       }
 
       .config-title {
         align-items: flex-start;
         flex-direction: column;
+        gap: 6px;
       }
 
       .config-title .refresh-btn {
@@ -668,18 +735,18 @@
       .ip-info-section,
       .config-content,
       .modal-content {
-        padding: 12px;
+        padding: 10px;
       }
 
       .client-btn {
-        min-height: 34px;
+        min-height: 32px;
       }
 
       .button,
       .refresh-btn,
       .copy-buttons,
       .client-btn {
-        font-size: 12px;
+        font-size: 11px;
       }
 
       .ip-info-item .label {
@@ -687,7 +754,11 @@
       }
 
       .ip-info-item .value {
-        font-size: 12px;
+        font-size: 11px;
+      }
+
+      .header h1 {
+        font-size: 16px;
       }
     }
   </style>
@@ -744,25 +815,25 @@
             <div class="ip-info-item">
               <span class="label">Proxy Host</span
               ><span class="value" id="proxy-host"
-                ><span class="skeleton" style="width: 150px"></span
+                ><span class="skeleton" style="width: 120px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">IP Address</span
               ><span class="value" id="proxy-ip"
-                ><span class="skeleton" style="width: 120px"></span
+                ><span class="skeleton" style="width: 100px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">Location</span
               ><span class="value" id="proxy-location"
-                ><span class="skeleton" style="width: 100px"></span
+                ><span class="skeleton" style="width: 90px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">ISP Provider</span
               ><span class="value" id="proxy-isp"
-                ><span class="skeleton" style="width: 140px"></span
+                ><span class="skeleton" style="width: 110px"></span
               ></span>
             </div>
           </div>
@@ -788,25 +859,25 @@
             <div class="ip-info-item">
               <span class="label">Your IP</span
               ><span class="value" id="client-ip"
-                ><span class="skeleton" style="width: 110px"></span
+                ><span class="skeleton" style="width: 100px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">Location</span
               ><span class="value" id="client-location"
-                ><span class="skeleton" style="width: 90px"></span
+                ><span class="skeleton" style="width: 80px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">ISP Provider</span
               ><span class="value" id="client-isp"
-                ><span class="skeleton" style="width: 130px"></span
+                ><span class="skeleton" style="width: 100px"></span
               ></span>
             </div>
             <div class="ip-info-item">
               <span class="label">Risk Score</span
               ><span class="value" id="client-proxy"
-                ><span class="skeleton" style="width: 100px"></span
+                ><span class="skeleton" style="width: 80px"></span
               ></span>
             </div>
           </div>
@@ -817,7 +888,7 @@
     <div class="config-card">
       <div class="config-title">
         <span>Xray Core Clients</span>
-        <button class="button copy-buttons" onclick="copyToClipboard(this, '{{CONFIG_DREAM}}')">
+        <button class="button copy-buttons copy-btn-icon-only" onclick="copyToClipboard(this, '{{CONFIG_DREAM}}')" data-tooltip="Copy configuration" aria-label="Copy Xray configuration">
           <svg
             class="copy-icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -833,24 +904,23 @@
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          Copy
         </button>
       </div>
       <div class="config-content"><pre id="xray-config">{{CONFIG_DREAM}}</pre></div>
       <div class="client-buttons">
-        <a href="{{URL_HIDDIFY}}" id="hiddify-import-btn" class="button client-btn">
+        <a href="{{URL_HIDDIFY}}" id="hiddify-import-btn" class="button client-btn" data-long-press-url="{{URL_HIDDIFY_ENCODED}}">
           <span class="client-icon"
             ><svg viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" /></svg
           ></span>
-          <span class="button-text">Import to Hiddify</span>
+          <span class="button-text">Hiddify</span>
         </a>
-        <a href="{{URL_V2RAYNG}}" class="button client-btn">
+        <a href="{{URL_V2RAYNG}}" class="button client-btn" data-long-press-url="{{URL_V2RAYNG_ENCODED}}">
           <span class="client-icon"
             ><svg viewBox="0 0 24 24">
-              <path d="M12 2L4 5v6c0 5.5 3.5 10.7 8 12.3 4.5-1.6 8-6.8 8-12.3V5l-8-3z" /></svg
+              <path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 2.67 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-4.42 0-6-2.55-6-6.2 0-2.34 1.08-4.74 3.6-7.72.9 1.1 1.96 2.48 3.4 4.08 1.44-1.6 2.5-2.98 3.4-4.08 2.52 2.98 3.6 5.38 3.6 7.72 0 3.65-1.58 6.2-6 6.2z" /></svg
           ></span>
-          <span class="button-text">Import to V2rayNG</span>
+          <span class="button-text">V2rayNG</span>
         </a>
       </div>
     </div>
@@ -858,7 +928,7 @@
     <div class="config-card">
       <div class="config-title">
         <span>Sing-Box Core Clients</span>
-        <button class="button copy-buttons" onclick="copyToClipboard(this, '{{CONFIG_FREEDOM}}')">
+        <button class="button copy-buttons copy-btn-icon-only" onclick="copyToClipboard(this, '{{CONFIG_FREEDOM}}')" data-tooltip="Copy configuration" aria-label="Copy Sing-Box configuration">
           <svg
             class="copy-icon"
             xmlns="http://www.w3.org/2000/svg"
@@ -874,31 +944,27 @@
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          Copy
         </button>
       </div>
       <div class="config-content"><pre id="singbox-config">{{CONFIG_FREEDOM}}</pre></div>
       <div class="client-buttons">
-        <a href="{{URL_CLASH}}" class="button client-btn">
+        <a href="{{URL_CLASH}}" class="button client-btn" data-long-press-url="{{URL_CLASH_ENCODED}}">
           <span class="client-icon"
             ><svg viewBox="0 0 24 24">
               <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"
               /></svg
           ></span>
-          <span class="button-text">Import to Clash Meta</span>
+          <span class="button-text">Clash Meta</span>
         </a>
-        <a href="{{URL_EXCLAVE}}" class="button client-btn">
+        <a href="{{URL_EXCLAVE}}" class="button client-btn" data-long-press-url="{{URL_EXCLAVE_ENCODED}}">
           <span class="client-icon"
             ><svg viewBox="0 0 24 24">
               <path
-                d="M20,8h-3V6c0-1.1-0.9-2-2-2H9C7.9,4,7,4.9,7,6v2H4C2.9,8,2,8.9,2,10v9c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2v-9 C22,8.9,21.1,8,20,8z M9,6h6v2H9V6z M20,19H4v-2h16V19z M20,15H4v-5h3v1c0,0.55,0.45,1,1,1h1.5c0.28,0,0.5-0.22,0.5-0.5v-0.5h4v0.5 c0,0.28,0.22,0.5,0.5,0.5H16c0.55,0,1-0.45,1-1v-1h3V15z"
-              />
-              <circle cx="8.5" cy="13.5" r="1" />
-              <circle cx="15.5" cy="13.5" r="1" />
-              <path d="M12,15.5c-0.55,0-1-0.45-1-1h2C13,15.05,12.55,15.5,12,15.5z" /></svg
+                d="M20 4h-3V3c0-.55-.45-1-1-1h-2c-.55 0-1 .45-1 1v1h-4V3c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v1H2v2h1v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6h1V4zm-2 15H4V6h14v13z"
+              /></svg
           ></span>
-          <span class="button-text">Import to Exclave</span>
+          <span class="button-text">Exclave</span>
         </a>
       </div>
     </div>
@@ -906,12 +972,11 @@
     <div id="custom-config-card" class="config-card" style="display: none;">
       <div class="config-title">
         <span>Custom Clean IP Nodes</span>
-        <button id="btn-copy-custom" class="button copy-buttons">
+        <button id="btn-copy-custom" class="button copy-buttons copy-btn-icon-only" data-tooltip="Copy configuration" aria-label="Copy custom IPs">
           <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          Copy All
         </button>
       </div>
       <div class="config-content">
@@ -956,19 +1021,17 @@
   </div>
 
     <script>
+      let longPressTimer;
+      let longPressElement;
+
       function copyToClipboard(button, text) {
         const originalHTML = button.innerHTML;
 
         navigator.clipboard
           .writeText(text)
           .then(() => {
-            button.innerHTML = `
-          <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Copied!
-        `;
+            const checkmarkSVG = `<svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            button.innerHTML = checkmarkSVG;
             button.classList.add("copied");
             button.disabled = true;
 
@@ -980,26 +1043,62 @@
           })
           .catch((err) => {
             console.error("Failed to copy text: ", err);
-            const originalHTMLError = button.innerHTML;
-
-            button.innerHTML = `
-          <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Error
-        `;
+            const alertSVG = `<svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            button.innerHTML = alertSVG;
             button.classList.add("error");
             button.disabled = true;
 
             setTimeout(() => {
-              button.innerHTML = originalHTMLError;
+              button.innerHTML = originalHTML;
               button.classList.remove("error");
               button.disabled = false;
             }, 1500);
           });
       }
-      
+
+      function handleLongPress(event) {
+        const button = event.currentTarget;
+        const url = button.getAttribute("data-long-press-url") || button.href;
+
+        longPressElement = button;
+        longPressTimer = setTimeout(() => {
+          navigator.clipboard.writeText(url).then(() => {
+            const originalHTML = button.innerHTML;
+            const checkmarkSVG = `<svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            
+            const tempSpan = document.createElement('span');
+            tempSpan.style.position = 'fixed';
+            tempSpan.style.top = event.touches ? (event.touches[0].clientY - 30) + 'px' : '50%';
+            tempSpan.style.left = event.touches ? (event.touches[0].clientX - 40) + 'px' : '50%';
+            tempSpan.style.background = '#30363d';
+            tempSpan.style.color = '#c9d1d9';
+            tempSpan.style.padding = '6px 10px';
+            tempSpan.style.borderRadius = '4px';
+            tempSpan.style.fontSize = '11px';
+            tempSpan.style.border = '1px solid #30363d';
+            tempSpan.style.pointerEvents = 'none';
+            tempSpan.style.zIndex = '10001';
+            tempSpan.textContent = 'Copied!';
+            document.body.appendChild(tempSpan);
+
+            setTimeout(() => tempSpan.remove(), 1200);
+          });
+        }, 600);
+      }
+
+      function handleLongPressEnd() {
+        if (longPressTimer) clearTimeout(longPressTimer);
+      }
+
+      document.addEventListener('touchstart', (e) => {
+        if (e.target.classList.contains('client-btn')) {
+          handleLongPress(e);
+        }
+      });
+
+      document.addEventListener('touchend', handleLongPressEnd);
+      document.addEventListener('touchcancel', handleLongPressEnd);
+
       function updateIpApiIoDisplay(geo, prefix, originalHost) {
         const hostElement = document.getElementById(`${prefix}-host`);
         if (hostElement) hostElement.textContent = originalHost || "N/A";
@@ -1070,16 +1169,15 @@
           const risk = data.risk;
           let badgeClass = "badge-neutral";
           
-          switch (risk.toLowerCase()) {
-            case "low":
+          if (risk) {
+            const riskLower = risk.toLowerCase();
+            if (riskLower.includes("low")) {
               badgeClass = "badge-yes";
-              break;
-            case "medium":
+            } else if (riskLower.includes("medium")) {
               badgeClass = "badge-warning";
-              break;
-            case "high":
+            } else if (riskLower.includes("high") || riskLower.includes("very high")) {
               badgeClass = "badge-no";
-              break;
+            }
           }
           elements.proxy.innerHTML = `<span class="badge ${badgeClass}">${score} - ${risk} Risk</span>`;
         }
@@ -1219,7 +1317,7 @@
           if (prefix === "client") elementsToReset.push("proxy");
           elementsToReset.forEach((key) => {
             const element = document.getElementById(`${prefix}-${key}`);
-            if (element) element.innerHTML = `<span class="skeleton" style="width: 120px;"></span>`;
+            if (element) element.innerHTML = `<span class="skeleton" style="width: 80px;"></span>`;
           });
         };
 
@@ -1232,10 +1330,6 @@
           }, 1000),
         );
       });
-
-      const style = document.createElement("style");
-      style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
-      document.head.appendChild(style);
 
       document.addEventListener("DOMContentLoaded", () => {
         const yearEl = document.getElementById("current-year");
