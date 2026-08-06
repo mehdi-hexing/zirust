@@ -2,7 +2,7 @@
 
 After forking this repository, you need to create a few GitHub repository secrets before running the workflow.
 
-Go to:
+Go to:  
 
 **Repository → Settings → Secrets and variables → Actions**
 
