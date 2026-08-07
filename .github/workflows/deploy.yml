@@ -6,14 +6,18 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      workername:
+        description: 'Optional: Enter a specific Worker name for this run'
+        required: false
+        default: 'zr-wasm'
       proxyip:
         description: 'Optional: Enter a specific Proxy IP / Hostname for this run'
         required: false
         default: 'di.nscl.ir'
       uuid:
-        description: 'Optional: Enter a specific UUID for this run'
+        description: 'Optional: Enter a specific UUID for this run (leave blank for a random one)'
         required: false
-        default: 'be0ff9df-1468-41a0-8865-796d1c6800db'
+        default: ''
 
 jobs:
   deploy:
@@ -28,14 +32,79 @@ jobs:
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - name: Deploy via Wrangler Action
+      - name: Resolve UUID
+        id: uuidval
+        env:
+          INPUT_UUID: ${{ inputs.uuid }}
+          SECRET_UUID: ${{ secrets.UUID }}
+        run: |
+          if [ -n "$INPUT_UUID" ]; then
+            UUID_VALUE="$INPUT_UUID"
+          elif [ -n "$SECRET_UUID" ]; then
+            UUID_VALUE="$SECRET_UUID"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            UUID_VALUE=$(curl -s https://www.uuidgenerator.net/api/version4 | tr -d '\n\r ')
+          else
+            UUID_VALUE="be0ff9df-1468-41a0-8865-796d1c6800db"
+          fi
+          echo "::add-mask::$UUID_VALUE"
+          echo "uuid=$UUID_VALUE" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PROXYIP
+        id: proxyval
+        env:
+          INPUT_PROXYIP: ${{ inputs.proxyip }}
+          SECRET_PROXYIP: ${{ secrets.PROXYIP }}
+        run: |
+          if [ -n "$INPUT_PROXYIP" ]; then
+            PROXY_VALUE="$INPUT_PROXYIP"
+          elif [ -n "$SECRET_PROXYIP" ]; then
+            PROXY_VALUE="$SECRET_PROXYIP"
+          else
+            PROXY_VALUE="di.nscl.ir"
+          fi
+          echo "proxyip=$PROXY_VALUE" >> "$GITHUB_OUTPUT"
+          echo "PROXYIP in use: \`$PROXY_VALUE\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update UUID in index.js
+        env:
+          UUID_VALUE: ${{ steps.uuidval.outputs.uuid }}
+        run: |
+          sed -i -E "s/(userID: \")[^\"]+(\")/\1${UUID_VALUE}\2/" index.js
+
+      - name: Resolve worker name
+        id: worker
+        run: |
+          DEFAULT_NAME=$(grep -m1 '^name' wrangler.toml | sed -E 's/name[[:space:]]*=[[:space:]]*"(.*)"/\1/')
+          NAME="${{ inputs.workername }}"
+          if [ -z "$NAME" ]; then NAME="$DEFAULT_NAME"; fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "### Deploying worker: \`$NAME\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "Deploy via Wrangler Action (${{ steps.worker.outputs.name }})"
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --name ${{ steps.worker.outputs.name }}
           vars: |
             UUID
             PROXYIP
         env:
-          UUID: ${{ inputs.uuid || secrets.UUID || 'be0ff9df-1468-41a0-8865-796d1c6800db' }}
-          PROXYIP: ${{ inputs.proxyip || secrets.PROXYIP || 'di.nscl.ir' }}
+          UUID: ${{ steps.uuidval.outputs.uuid }}
+          PROXYIP: ${{ steps.proxyval.outputs.proxyip }}
+
+      - name: Show worker URL
+        run: |
+          BASE_URL="${{ steps.deploy.outputs.deployment-url }}"
+          BASE_URL="${BASE_URL%/}"
+          {
+            echo ""
+            echo "## 🔗 Worker deployed"
+            echo "Base URL: $BASE_URL"
+            echo ""
+            echo "This repo is public, so the UUID is never printed in these logs."
+            echo "To get your panel link (\`$BASE_URL/<UUID>\`), open your Cloudflare dashboard:"
+            echo "https://dash.cloudflare.com → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets"
+          } >> "$GITHUB_STEP_SUMMARY"
