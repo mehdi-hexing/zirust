@@ -7,15 +7,15 @@ on:
   workflow_dispatch:
     inputs:
       workername:
-        description: 'Optional: Enter a specific Worker name for this run (only lowercase)'
+        description: 'Optional: Enter a specific Worker name for this run (lowercase only)'
         required: false
         default: '0x00'
       proxyip:
-        description: 'Optional: Enter a specific Proxy IP / Hostname for this run'
+        description: 'Optional: Enter a specific Proxy IP/host for this run'
         required: false
         default: 'di.nscl.ir'
       uuid:
-        description: 'Optional: Enter a specific UUID for this run (leave blank for a random one)'
+        description: 'Optional: Enter a specific UUID for this run (leave blank to generate a random one)'
         required: false
         default: ''
 
@@ -109,18 +109,22 @@ jobs:
             echo "## ✅ Deployment Successful."
             echo ""
             echo "| | |"
-            echo "|---|--------|"
+            echo "|---|----|"
             echo "| **Worker name** | \`${{ steps.worker.outputs.name }}\` |"
             echo "| **Base URL** | $BASE_URL |"
             echo ""
             echo "> [!WARNING]"
             echo ">"
-            echo "> 🔒 This repo is public, so the UUID is never printed in these logs.  "
+            echo "> 🔒 This repo is public, so the UUID is never printed in these logs."
             echo ">"
             echo "> To access the panel, you need your UUID:"
-            echo "> (\`$BASE_URL/<UUID>\`)  "
-            echo "> Open your Cloudflare dashboard:  "
-            echo "> Compute → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets, and copy your own **UUID**."
+            echo "> \`$BASE_URL/<UUID>\`"
             echo ">"
-            echo "> **[🌐 Click here and login to CloudFlare](https://dash.cloudflare.com/?to=/:account/workers-and-pages)**"
+            echo "> Open your Cloudflare dashboard:"
+            echo ">"
+            echo "> Compute → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets"
+            echo ">"
+            echo "> Copy your own **UUID**."
+            echo ">"
+            echo "> **[🪩 Click here to log in to Cloudflare](https://dash.cloudflare.com/?to=/:account/workers-and-pages)**"
           } >> "$GITHUB_STEP_SUMMARY"
