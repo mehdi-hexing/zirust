@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       workername:
-        description: 'Optional: Enter a specific Worker name for this run'
+        description: 'Optional: Enter a specific Worker name for this run (only lowercase)'
         required: false
-        default: 'zr-wasm'
+        default: '0x00'
       proxyip:
         description: 'Optional: Enter a specific Proxy IP / Hostname for this run'
         required: false
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -38,15 +38,26 @@ jobs:
           INPUT_UUID: ${{ inputs.uuid }}
           SECRET_UUID: ${{ secrets.UUID }}
         run: |
+          UUID_REGEX="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          FALLBACK_UUID="be0ff9df-1468-41a0-8865-796d1c6800db"
+
           if [ -n "$INPUT_UUID" ]; then
             UUID_VALUE="$INPUT_UUID"
           elif [ -n "$SECRET_UUID" ]; then
             UUID_VALUE="$SECRET_UUID"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            UUID_VALUE=$(curl -s https://www.uuidgenerator.net/api/version4 | tr -d '\n\r ')
+            UUID_VALUE=$(curl -s --max-time 5 https://www.uuidgenerator.net/api/version4 | tr -d '\n\r ')
+            if ! [[ "$UUID_VALUE" =~ $UUID_REGEX ]]; then
+              UUID_VALUE="$FALLBACK_UUID"
+            fi
           else
-            UUID_VALUE="be0ff9df-1468-41a0-8865-796d1c6800db"
+            UUID_VALUE="$FALLBACK_UUID"
           fi
+
+          if ! [[ "$UUID_VALUE" =~ $UUID_REGEX ]]; then
+            UUID_VALUE="$FALLBACK_UUID"
+          fi
+
           echo "::add-mask::$UUID_VALUE"
           echo "uuid=$UUID_VALUE" >> "$GITHUB_OUTPUT"
 
@@ -65,12 +76,6 @@ jobs:
           fi
           echo "proxyip=$PROXY_VALUE" >> "$GITHUB_OUTPUT"
           echo "PROXYIP in use: \`$PROXY_VALUE\`" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Update UUID in index.js
-        env:
-          UUID_VALUE: ${{ steps.uuidval.outputs.uuid }}
-        run: |
-          sed -i -E "s/(userID: \")[^\"]+(\")/\1${UUID_VALUE}\2/" index.js
 
       - name: Resolve worker name
         id: worker
@@ -101,10 +106,17 @@ jobs:
           BASE_URL="${BASE_URL%/}"
           {
             echo ""
-            echo "## 🔗 Worker deployed"
-            echo "Base URL: $BASE_URL"
+            echo "## 🛠️ Deployment Successful"
             echo ""
-            echo "This repo is public, so the UUID is never printed in these logs."
-            echo "To get your panel link (\`$BASE_URL/<UUID>\`), open your Cloudflare dashboard:"
-            echo "https://dash.cloudflare.com → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets"
+            echo "| | |"
+            echo "|---|--------|"
+            echo "| **Worker** | \`${{ steps.worker.outputs.name }}\` |"
+            echo "| **Base URL** | $BASE_URL |"
+            echo ""
+            echo "> 🔒 This repo is public, so the UUID is never printed in these logs."
+            echo ">"
+            echo "> To get your panel link (\`$BASE_URL/<UUID>\`), open your Cloudflare dashboard:"
+            echo "> Compute → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets"
+            echo ">"
+            echo "> [Click here to open Workers and pages](https://dash.cloudflare.com/?to=/:account/workers-and-pages)"
           } >> "$GITHUB_STEP_SUMMARY"
