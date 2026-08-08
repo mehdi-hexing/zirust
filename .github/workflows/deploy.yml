@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -88,7 +88,7 @@ jobs:
 
       - name: "Deploy via Wrangler Action (${{ steps.worker.outputs.name }})"
         id: deploy
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -106,17 +106,21 @@ jobs:
           BASE_URL="${BASE_URL%/}"
           {
             echo ""
-            echo "## 🛠️ Deployment Successful"
+            echo "## ✅ Deployment Successful."
             echo ""
             echo "| | |"
             echo "|---|--------|"
-            echo "| **Worker** | \`${{ steps.worker.outputs.name }}\` |"
+            echo "| **Worker name** | \`${{ steps.worker.outputs.name }}\` |"
             echo "| **Base URL** | $BASE_URL |"
             echo ""
-            echo "> 🔒 This repo is public, so the UUID is never printed in these logs."
+            echo "> [!WARNING]"
             echo ">"
-            echo "> To get your panel link (\`$BASE_URL/<UUID>\`), open your Cloudflare dashboard:"
-            echo "> Compute → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets"
+            echo "> 🔒 This repo is public, so the UUID is never printed in these logs.  "
             echo ">"
-            echo "> [Click here to open Workers and pages](https://dash.cloudflare.com/?to=/:account/workers-and-pages)"
+            echo "> To access the panel, you need your UUID:"
+            echo "> (\`$BASE_URL/<UUID>\`)  "
+            echo "> Open your Cloudflare dashboard:  "
+            echo "> Compute → Workers & Pages → **${{ steps.worker.outputs.name }}** → Settings → Variables and Secrets, and copy your own **UUID**."
+            echo ">"
+            echo "> **[🌐 Click here and login to CloudFlare](https://dash.cloudflare.com/?to=/:account/workers-and-pages)**"
           } >> "$GITHUB_STEP_SUMMARY"
