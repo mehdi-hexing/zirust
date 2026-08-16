@@ -138,7 +138,7 @@ function buildLink({ core, proto, userID, hostName, address, port, tag, enhanced
     userID,
     address,
     port,
-    host: hostName,
+    host: proto === "tcp" ? randomizeCase(hostName) : hostName,
     path: p.path(),
     security: p.security,
     sni: p.security === "tls" ? hostName : undefined,
