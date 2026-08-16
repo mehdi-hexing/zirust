@@ -136,7 +136,7 @@ function buildLink({ core, proto, userID, hostName, address, port, tag, enhanced
   const p = CORE_PRESETS[core][proto];
   return createVlessLink({
     userID,
-    address: randomizeCase(address),
+    address: proto === "tls" ? randomizeCase(address) : address,
     port,
     host: proto === "tcp" ? randomizeCase(hostName) : hostName,
     path: p.path(),
