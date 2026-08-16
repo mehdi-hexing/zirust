@@ -65,6 +65,13 @@ function generateRandomPath(length = 28, query = "") {
   return `/${result}${query ? `?${query}` : ""}`;
 }
 
+function randomizeCase(str) {
+  return str
+    .split("")
+    .map((ch) => (Math.random() < 0.5 ? ch.toUpperCase() : ch.toLowerCase()))
+    .join("");
+}
+
 const CORE_PRESETS = {
   xray: {
     tls: {
@@ -114,7 +121,7 @@ function createVlessLink({
   if (security) {
     params.set("security", security);
   }
-  if (sni) params.set("sni", sni);
+  if (sni) params.set("sni", randomizeCase(sni));
   if (fp) params.set("fp", fp);
   if (alpn) params.set("alpn", alpn);
   if (enhanced) {
